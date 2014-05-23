@@ -1,0 +1,69 @@
+module TEMPLATE_PRIO(TEMPLATE_COMMON) is
+
+	process PRIO [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL] (total : NAT) is
+	var
+		cm_failed : BOOL,
+		done : BOOL,
+		nr : NAT,
+		nr_act: NAT
+	in
+		done := FALSE;
+		cm_failed := FALSE;
+		nr_act := 0 of NAT;
+		loop
+			select
+			
+			(*
+			 * Listen for any child to be triggered which is not the first.
+			 * If this happens, (and we are in the initial state)
+			 * then set cm_failed to true so we can never fail anymore
+			 * 
+			 *)
+				FAIL (?nr) where (1 < nr) and (nr <= total);
+				if not (done) and not(cm_failed) then
+					cm_failed := true
+				end if;
+				nr := 0
+			
+			(*
+			 * Listen for the first child to fail
+			 * if no other chiled has failed before, then the PRIO gate has failed
+			 *)
+			[]
+				FAIL (?nr) where (1 == nr);
+				if not (done) and not(cm_failed) then
+					FAIL (!0 of NAT); done := TRUE
+				end if;
+				nr := 0
+
+
+			(*
+			 * If this node is activated, enable the activation of the source.
+			 *)
+			[]
+				ACTIVATE (?nr,FALSE) where (nr == (0 of NAT));
+				if (nr_act == 0 of NAT) then
+					nr_act := 1 of NAT
+				end if
+			
+			(*
+			 * If the children should be activated, do so, one by one,
+			 * from left to right.
+			 *)
+			[]
+				if (nr_act > 0) then
+					ACTIVATE (!nr_act,TRUE);
+					if nr_act < total  then
+						nr_act := nr_act + 1
+					else
+						nr_act := 0
+					end if
+				end if
+			end select
+		end loop
+	end var
+	end process
+
+
+end module 
+

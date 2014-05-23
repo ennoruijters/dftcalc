@@ -1,0 +1,79 @@
+module TEMPLATE_SEQAND(TEMPLATE_COMMON) is
+
+	process SEQAND [FAIL : NAT_CHANNEL, SUCC : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL] (active : NAT, total : NAT) is
+	var
+		done : BOOL,
+		failed : BOOL,
+		act  : BOOL,
+		success : BOOL,
+		activated : BOOL,
+		nr : NAT
+	in
+		done := FALSE;
+		act  := FALSE;
+		failed := FALSE;
+		success := FALSE;
+		activated := FALSE;
+		loop
+			select
+
+			(*
+			 * Listen for the succes of a child
+			 * The gate can no longer be penetrated
+			 *)
+				SUCC (?nr)  where (nr == active) and (not (done)) and (not (failed)) and (not (success)) and (activated);
+				if (not (done)) and (not (failed)) and (not (success)) then
+					SUCC (!0 of NAT); success := TRUE
+				end if;
+				nr := 0
+
+			(*
+			 * Listen for the failure of a child which is not the last
+			 * Start the Activation procedure for the succeeding child
+			 *)
+			[]
+				FAIL (?nr) where (nr < total) and (nr > 0) and (nr == active) and (not (done)) and (not (failed)) and (not(success));
+				if (not (done)) and (not (failed)) and (not (success)) and (active < total) then
+					active := active + 1 of NAT;
+					act := TRUE
+				end if;
+				nr := 0
+			
+			(*
+			 * Listen for the failure of the last child
+			 *)
+			[]
+				FAIL (?nr) where (total == nr) and (not (success)) and (not (failed)) and (not (done));
+				if (not (done)) and (not (failed)) and (not (success)) and (active == total) then
+					failed := TRUE
+				end if;
+				nr := 0
+
+			(*
+			 * If this node is activated, activate the first child.
+			 *)
+			[]
+				ACTIVATE (?nr,FALSE) where (nr == (0 of NAT));
+				if (active == 0) then
+					activated := TRUE;
+					active := 1 of NAT;
+					act := TRUE
+				end if
+
+			[]
+				if (act) and (not (success)) and (not (failed)) and (not (done)) then
+					ACTIVATE (!active,TRUE);
+					act := FALSE
+				end if
+			[]
+				if (failed) and not (done) and (not (success)) then
+					FAIL (!0 of NAT); done := TRUE
+				end if
+			end select
+		end loop
+	end var
+	end process
+
+
+end module 
+

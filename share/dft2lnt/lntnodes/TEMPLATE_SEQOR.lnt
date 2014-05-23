@@ -1,0 +1,79 @@
+module TEMPLATE_SEQOR(TEMPLATE_COMMON) is
+
+	process SEQOR [FAIL : NAT_CHANNEL, SUCC : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL] (total : NAT) is
+	var
+		done : BOOL,
+		failed : BOOL,
+		act  : BOOL,
+		success : BOOL,
+		nr : NAT,
+		nr_act: NAT
+	in
+		done := FALSE;
+		act  := FALSE;
+		success := FALSE;
+		failed := FALSE;
+		nr_act := 0 of NAT;
+		loop
+			select
+			
+			(*
+			 * If a child succeeded, go to the next child
+			 * Start the Activation procedure for the succeeding child
+			 *)
+				SUCC (?nr)  where (0 < nr) and (nr < total) and (nr == nr_act);
+				if ((not (done)) and (not (success)) and (nr_act < total)) then
+					nr_act := nr_act + 1 of NAT;
+					ACTIVATE (!nr_act,TRUE)
+				end if;
+				nr := 0
+			
+			(*
+			 * If the last child succeeded, no FAILURE signal is generated
+			 * We reach an absorbing state
+			 *)
+			[]
+				SUCC (?nr) where (total == nr) and (nr == nr_act);
+				if ((not (done)) and (not (success)) and (nr_act == total)) then
+					SUCC (!0 of NAT);
+					success := TRUE
+				end if;
+				nr := 0
+
+			(*
+			 * If the currently active child fails, start the failure procedure of the gate
+			 *)
+			[]
+				FAIL (?nr) where (nr == nr_act) and (nr > 0);
+				if ((not (done)) and (not (success))) then
+					done := TRUE
+				end if;
+				nr := 0
+
+			(*
+			 * If this node is activated, activate the first child.
+			 *)
+			[]
+				ACTIVATE (?nr,FALSE) where (nr == (0 of NAT));
+				if ((nr_act == 0) and (not (done))) then
+					nr_act := 1 of NAT;
+					ACTIVATE (!nr_act,TRUE)
+				end if;
+				nr := 0
+
+
+			(*
+			 * Failure Procedure for the SEQOR gate
+			 *)
+			[]
+				if ((done) and (not (failed)) and (not (success))) then
+					FAIL (!0 of NAT); failed := TRUE
+				end if
+			end select
+		end loop
+	end var
+	end process
+
+
+end module 
+
