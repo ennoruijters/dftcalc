@@ -4,7 +4,7 @@
  * Part of dft2lnt library - a library containing read/write operations for DFT
  * files in Galileo format and translating DFT specifications into Lotos NT.
  * 
- * @author Freark van der Berg and extended by Dennis Guck
+ * @author Freark van der Berg
  */
 
 #ifndef ASTVALIDATOR_H
@@ -119,11 +119,6 @@ public:
 		if(!ast) return false;
 		
 		buildDefinedNodesList();
-
-		if (definedNodes.size() == 0) {
-			std::cout << "No nodes defined (nada niente nix nenio). Empty input file?!?!?" << std::endl;
-			return false;
-		}
 		
 		int valid = true;
 		
@@ -263,54 +258,6 @@ public:
 					cc->reportErrorAt(attribute->getLocation(),"dorm label needs float value");
 				}
 				break;
-			// check for new repair label
-			case DFT::Nodes::BE::AttrLabelRepair:
-				if(!value) {
-					valid = false;
-					cc->reportErrorAt(attribute->getLocation(),"repair label without value");
-					break;
-				}
-				if(value->isFloat()) {
-					float v = static_cast<DFT::AST::ASTAttribFloat*>(value)->getValue();
-					if(v < 0) {
-						valid = false;
-						cc->reportErrorAt(attribute->getLocation(),"negative repair");
-					}
-				} else if(value->isNumber()) {
-					int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
-					if(v < 0) {
-						valid = false;
-						cc->reportErrorAt(attribute->getLocation(),"negative repair");
-					}
-				} else {
-					valid = false;
-					cc->reportErrorAt(attribute->getLocation(),"repair label needs float value");
-				}
-			break;
-			// check for new priority label
-			case DFT::Nodes::BE::AttrLabelPrio:
-				if(!value) {
-					valid = false;
-					cc->reportErrorAt(attribute->getLocation(),"priority label without value");
-					break;
-				}
-				if(value->isNumber()) {
-					int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
-					if(v < 0) {
-						valid = false;
-						cc->reportErrorAt(attribute->getLocation(),"negative priority");
-					}
-				} else if(value->isFloat()) {
-					int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
-					if(v < 0) {
-						valid = false;
-						cc->reportErrorAt(attribute->getLocation(),"negative priority");
-					}
-				} else {
-					valid = false;
-					cc->reportErrorAt(attribute->getLocation(),"priority label needs integer value");
-				}
-			break;
 			case DFT::Nodes::BE::AttrLabelAph:
 				if(!value) {
 					valid = false;
@@ -338,6 +285,28 @@ public:
 				break;
 
 			case DFT::Nodes::BE::AttrLabelProb:
+				if(!value) {
+					valid = false;
+					cc->reportErrorAt(attribute->getLocation(),"prob label without value");
+					break;
+				}
+				if(value->isFloat()) {
+					float v = static_cast<DFT::AST::ASTAttribFloat*>(value)->getValue();
+					if(v < 0) {
+						valid = false;
+						cc->reportErrorAt(attribute->getLocation(),"negative prob");
+					}
+				} else if(value->isNumber()) {
+					int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+					if(v < 0) {
+						valid = false;
+						cc->reportErrorAt(attribute->getLocation(),"negative prob");
+					}
+				} else {
+					valid = false;
+					cc->reportErrorAt(attribute->getLocation(),"prob label needs float value");
+				}
+				break;
 
 			case DFT::Nodes::BE::AttrLabelRate:
 			case DFT::Nodes::BE::AttrLabelShape:

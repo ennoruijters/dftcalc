@@ -17,9 +17,11 @@
 #include "dftnodes/GateAnd.h"
 #include "dftnodes/GateOr.h"
 #include "dftnodes/GateVoting.h"
+#include "dftnodes/GatePrio.h"
+#include "dftnodes/GateSEQAnd.h"
+#include "dftnodes/GateSEQOr.h"
 #include "dftnodes/GateWSP.h"
 #include "dftnodes/GatePAnd.h"
 #include "dftnodes/GateFDEP.h"
-#include "dftnodes/RepairUnit.h"
 
 #endif // NODES_H

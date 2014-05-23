@@ -4,7 +4,7 @@ module TEMPLATE_COMMON is
 	channel NAT_BOOL_CHANNEL is (NAT,BOOL) end channel
 	
 	type STATUS is
-		DORMANT, ACTIVE, FAILING, FAILED
+		DORMANT, ACTIVE, FAILING, FAILED, SUCCEEDING, SUCCESS
 		with "==", "!="
 	end type
 end module 

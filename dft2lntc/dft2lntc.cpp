@@ -4,7 +4,7 @@
  * Part of dft2lnt library - a library containing read/write operations for DFT
  * files in Galileo format and translating DFT specifications into Lotos NT.
  * 
- * @author Freark van der Berg and extended by Dennis Guck
+ * @author Freark van der Berg
  */
 
 #include <stdlib.h>
@@ -484,7 +484,6 @@ int main(int argc, char** argv) {
 	compilerContext->flush();
 	if(!ast || compilerContext->getErrors()>0) {
 		compilerContext->reportError("Syntax is incorrect");
-		ast = 0;
 	} else {
 		compilerContext->reportAction("Syntax is correct",VERBOSITY_FLOW);
 	}
@@ -507,10 +506,10 @@ int main(int argc, char** argv) {
 	compilerContext->flush();
 	
 	/* Validate input */
+	compilerContext->notify("Validating AST...",VERBOSITY_FLOW);
+	compilerContext->flush();
 	int astValid = false;
 	if(ast) {
-		compilerContext->notify("Validating AST...",VERBOSITY_FLOW);
-		compilerContext->flush();
 		DFT::ASTValidator validator(ast,compilerContext);
 		astValid = validator.validate();
 		if(!astValid) {
@@ -553,25 +552,16 @@ int main(int argc, char** argv) {
 	
 	/* Apply evidence to DFT */
 	if(dftValid && !failedBEs.empty()) {
-		compilerContext->reportAction("Applying evidence to DFT...",VERBOSITY_FLOW);
-		compilerContext->flush();
+		compilerContext->reportAction("Appling evidence to DFT...",VERBOSITY_FLOW);
 		try {
 			dft->applyEvidence(failedBEs);
 		} catch(std::vector<std::string>& errors) {
 			for(std::string e: errors) {
 				compilerContext->reportError(e);
 			}
-			compilerContext->flush();
 		}
 	}
 	
-	/* Add repair knowledge to gates */
-	if(dft) {
-		compilerContext->reportAction("Applying repair knowledge to DFT gates...",VERBOSITY_FLOW);
-		compilerContext->flush();
-		dft->addRepairInfo();
-	}
-
 	/* Printing DFT */
 	if(dftValid && outputDFTFileSet) {
 		compilerContext->notify("Printing DFT...",VERBOSITY_FLOW);

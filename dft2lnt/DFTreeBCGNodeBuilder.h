@@ -4,7 +4,7 @@
  * Part of dft2lnt library - a library containing read/write operations for DFT
  * files in Galileo format and translating DFT specifications into Lotos NT.
  * 
- * @author Freark van der Berg and extended by Dennis Guck
+ * @author Freark van der Berg
  */
 
 namespace DFT {
@@ -27,13 +27,10 @@ class DFTreeBCGNodeBuilder {
 public:
 	static const std::string GATE_FAIL;
 	static const std::string GATE_ACTIVATE;
-	static const std::string GATE_DEACTIVATE;
 	static const std::string GATE_REPAIR;
-	static const std::string GATE_REPAIRED;
-	static const std::string GATE_ONLINE;
 	static const std::string GATE_RATE_FAIL;
 	static const std::string GATE_RATE_REPAIR;
-	static const std::string GATE_REPAIRING;
+	static const std::string GATE_SUCC;
 private:
 	static const unsigned int VERSION;
 	static const int VERBOSE_LNTISVALID;
@@ -56,13 +53,12 @@ private:
 	int generateOr(FileWriter& out, const DFT::Nodes::GateOr& gate);
 	int generateVoting(FileWriter& out, const DFT::Nodes::GateVoting& gate);
 	int generatePAnd(FileWriter& out, const DFT::Nodes::GatePAnd& gate);
+	int generatePrio(FileWriter& out, const DFT::Nodes::GatePrio& gate);
+	int generateSEQAnd(FileWriter& out, const DFT::Nodes::GateSEQAnd& gate);
+	int generateSEQOr(FileWriter& out, const DFT::Nodes::GateSEQOr& gate);
 	int generateSpare(FileWriter& out, const DFT::Nodes::GateWSP& gate);
 	int generateFDEP(FileWriter& out, const DFT::Nodes::GateFDEP& gate);
 	int generateBE(FileWriter& out, const DFT::Nodes::BasicEvent& gate);
-	int generateRU(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
-	int generateRU_FCFS(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
-	int generateRU_Prio(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
-	int generateRU_Nd(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
 
 	int generateSVLBuilder(FileWriter& out, std::string fileName);
 	int executeSVL(std::string root, std::string fileName);

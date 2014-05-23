@@ -1,12 +1,13 @@
 module TEMPLATE_BE(TEMPLATE_COMMON) is
 
-	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS) is
+	process BEproc [FAIL : NAT_CHANNEL, SUCC : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS) is
 	var
 		status : STATUS,
 		nr : NAT
 	in
 		status := initial;
 		nr := 0;
+
 		loop
 			select
 			
@@ -27,12 +28,18 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 			 * If the failure event is trigger, go into the FAILING state.
 			 *)
 			[]
-
 				if ((not (cold)) and (status == DORMANT)) then
-					RATE_FAIL (!1 of NAT,1 of NAT);
+					RATE_FAIL (!1 of NAT,2 of NAT);
 					status := FAILING
 				end if
+			[]
+				if ((not (cold)) and (status == DORMANT)) then
+					RATE_FAIL (!1 of NAT,3 of NAT);
+					status := SUCCEEDING
+				end if
+
 			
+
 			(*
 			 * When this BE is in the ACTIVE state, it can fail with the
 			 * failure rate associated with this state. The rate is later
@@ -44,6 +51,12 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 					RATE_FAIL (!1 of NAT,2 of NAT);
 					status := FAILING
 				end if
+
+			[]
+				if (status == ACTIVE) then
+					RATE_FAIL (!1 of NAT,3 of NAT);
+					status := SUCCEEDING
+				end if
 			
 			(*
 			 * When this BE is in the FAILING state (caused by one of the
@@ -54,6 +67,18 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 				if (status == FAILING) then
 					FAIL (!0 of NAT);
 					status := FAILED
+				end if
+
+			(*
+			 * When this BE succeeded (caused by the
+			 * success rate), signal this to the system using SUCC !0.
+			 * After this, go into the SUCC state.
+			 *)
+
+			[]
+				if (status == SUCCEEDING) then
+					SUCC (!0 of NAT);
+					status := SUCCESS
 				end if
 			end select
 		end loop

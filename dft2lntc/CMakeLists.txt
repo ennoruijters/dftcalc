@@ -1,8 +1,8 @@
 ## The DFT2LNT Compiler project
 project (dft2lntc)
 set (dft2lntc_VERSION_MAJOR 1)
-set (dft2lntc_VERSION_MINOR 1)
-set (dft2lntc_VERSION_PATCH 0)
+set (dft2lntc_VERSION_MINOR 0)
+set (dft2lntc_VERSION_PATCH 2)
 
 ## Not sure if needed
 cmake_minimum_required (VERSION 2.6)
@@ -56,7 +56,6 @@ install (TARGETS dft2lntc DESTINATION bin)
 		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../compiletime.cmake ${gendepSOURCES}
 		COMMAND ${CMAKE_COMMAND} -DCMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
 				-DCMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
-				-DUSECOMMANDLINEGITINFO=${USECOMMANDLINEGITINFO} -Dgit_output=${git_output} -Dgit_changed=${git_changed} -Dgit_version=${git_version} -Dgit_test=${git_test}
 				-P ${CMAKE_CURRENT_SOURCE_DIR}/../compiletime.cmake
 				../..
 	)

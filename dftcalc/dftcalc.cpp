@@ -59,7 +59,6 @@ void print_help(MessageFormatter* messageFormatter, string topic="") {
 		messageFormatter->message("  -R              Reuse existing output files.");
 		messageFormatter->message("  --mrmc          Use MRMC. (standard setting)");
 		messageFormatter->message("  --imca          Use IMCA instead of MRMC.");
-		messageFormatter->message("  --no-nd-warning Do not warn (but give notice) for non-determinism.");
 		messageFormatter->message("");
 		messageFormatter->notify ("Debug Options:");
 		messageFormatter->message("  --verbose=x     Set verbosity to x, -1 <= x <= 5.");
@@ -82,8 +81,6 @@ void print_help(MessageFormatter* messageFormatter, string topic="") {
 		messageFormatter->message("                  See --mrmc and --imca");
 		messageFormatter->message("  -E errorbound   Error bound, to be passed to IMCA.");
 		messageFormatter->message("  -C DIR          Temporary output files will be in this directory");
-		messageFormatter->message("  --min           Compute minimum time-bounded reachability (default)");
-		messageFormatter->message("  --max           Compute maximum time-bounded reachability");
 		messageFormatter->flush();
 	} else if(topic=="output") {
 		messageFormatter->notify ("Output");
@@ -100,12 +97,10 @@ void print_help(MessageFormatter* messageFormatter, string topic="") {
 		messageFormatter->message("      mem_virtual: 13668");
 		messageFormatter->message("      mem_resident: 1752");
 		messageFormatter->message("  The Calculation command can be manually set using -f.");
-		messageFormatter->message("  For MRMC the defaults are:");
-		messageFormatter->message("    P{>1} [ tt U[0,n] reach ]             (default)");
-		messageFormatter->message("    P{<0} [ tt U[0,n] reach ]             (when --max is given)");
-		messageFormatter->message("  and for IMCA the defaults are:");
-		messageFormatter->message("    -min -tb -T n                         (default)");
-		messageFormatter->message("    -max -tb -T n                         (when --max is given)");
+		messageFormatter->message("  For MRMC the default is:");
+		messageFormatter->message("    P{>1} [ tt U[0,n] reach ]");
+		messageFormatter->message("  and for IMCA the default is:");
+		messageFormatter->message("    -max -tb -T n");
 		messageFormatter->message("  where n is the mission time (specified via -t or -i), default is 1.");
 	} else if(topic=="settings") {
 		messageFormatter->notify ("Settings");
@@ -319,17 +314,7 @@ void DFT::DFTCalc::printOutput(const File& file, int status) {
 	}
 }
 
-bool hasHiddenLabels(const File& file) {
-	std::string* fileContents = FileSystem::load(file);
-	bool res = false;
-	if (fileContents) {
-		res = ((*fileContents).find("no transition with a hidden label", 0) ==  string::npos);
-		delete fileContents;
-	}
-	return res;
-}
-
-int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const File& dftOriginal, const std::vector<std::pair<std::string,std::string>>& calcCommands, unordered_map<string,string> settings, bool calcImca, bool warnNonDeterminism) {
+int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const File& dftOriginal, const std::vector<std::pair<std::string,std::string>>& calcCommands, unordered_map<string,string> settings, bool calcImca) {
 	File dft    = dftOriginal.newWithPathTo(cwd);
 	File svl    = dft.newWithExtension("svl");
 	File svlLog = dft.newWithExtension("log");
@@ -441,38 +426,7 @@ int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const F
 	if(Shell::readMemtimeStatisticsFromLog(svlLog,stats)) {
 		messageFormatter->reportWarning("Could not read from svl log file `" + svlLog.getFileRealPath() + "'");
 	}
-
-	// test for non-determinism	
-	messageFormatter->reportAction("Testing for non-determinism...",VERBOSITY_FLOW);
-	sysOps.reportFile = cwd + "/" + dft.getFileBase() + "." + intToString(com  ) + ".bcg_info.report";
-	sysOps.errFile    = cwd + "/" + dft.getFileBase() + "." + intToString(com  ) + ".bcg_info.err";
-	sysOps.outFile    = cwd + "/" + dft.getFileBase() + "." + intToString(com++) + ".bcg_info.out";
-	sysOps.command    = bcginfoExec.getFilePath()
-				+ " -hidden"
-				+ " \""    + bcg.getFileRealPath() + "\""
-				;
-	result = Shell::system(sysOps);
-		
-	if(result || !FileSystem::exists(sysOps.outFile)) {
-		printOutput(File(sysOps.outFile), result);
-		printOutput(File(sysOps.errFile), result);
-		return 1;
-	} else if (messageFormatter->getVerbosity() >= 5) {
-		printOutput(File(sysOps.outFile), result);
-		printOutput(File(sysOps.errFile), result);
-	}
-
-	if (hasHiddenLabels(File(sysOps.outFile))) {
-		if (warnNonDeterminism) {
-			messageFormatter->reportWarning("Non-determinism detected... you will want to ask for both 'min' and 'max' analysis results!");
-		} else {
-			messageFormatter->notify("Non-determinism detected... you will want to ask for both 'min' and 'max' analysis results!");
-		}
-	} else {
-		messageFormatter->notify("No non-determinism detected.");
-	}
-
-		
+	
 	if(!calcImca) {
 		if(!reuse || !FileSystem::exists(ctmdpi)) {
 			// bcg -> ctmdpi, lab
@@ -491,9 +445,6 @@ int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const F
 				printOutput(File(sysOps.outFile), result);
 				printOutput(File(sysOps.errFile), result);
 				return 1;
-			} else if (messageFormatter->getVerbosity() >= 5) {
-				printOutput(File(sysOps.outFile), result);
-				printOutput(File(sysOps.errFile), result);
 			}
 		} else {
 			messageFormatter->reportAction("Reusing IMC to CTMDPI translation result",VERBOSITY_FLOW);
@@ -701,17 +652,13 @@ int main(int argc, char** argv) {
 	int    errorBoundSet      = 0;
 
 	int verbosity            = 0;
-	bool warnNonDeterminism  = true;
 	int print                = 0;
 	int reuse                = 0;
 	int useColoredMessages   = 1;
 	int printHelp            = 0;
 	string printHelpTopic    = "";
 	int printVersion         = 0;
-	bool calcImca            = false;
-	string imcaMinMax        = "-min";
-	string mrmcMinMax        = "{>1}";
-	int imcaMinMaxSet        = 0;
+	bool calcImca = false;
 	
 	std::vector<std::string> failedBEs;
 	
@@ -862,16 +809,6 @@ int main(int argc, char** argv) {
 					}
 				} else if(!strcmp("no-color",optarg)) {
 					useColoredMessages = false;
-				} else if(!strcmp("no-nd-warning",optarg)) {
-					warnNonDeterminism = false;
-				} else if(!strcmp("min",optarg)) {
-					imcaMinMaxSet = true;
-					imcaMinMax = "-min";
-					mrmcMinMax = "{>1}";
-				} else if(!strcmp("max",optarg)) {
-					imcaMinMaxSet = true;
-					imcaMinMax = "-max";
-					mrmcMinMax = "{<0}";
 				}
 				if(!strcmp("mrmc",optarg)) {
 					calcImca=false;
@@ -896,13 +833,13 @@ int main(int argc, char** argv) {
 		imcaEb = " -e " + errorBound;
 	}
 
-	if (mttf && (calcCommandSet || timeIntervalSet || timeSpecSet || timeLwbUpbSet)) {
+	if (mttf && (calcCommandSet || timeIntervalSet || timeSpecSet ||timeLwbUpbSet)) {
 		messageFormatter->reportWarningAt(Location("commandline"),"MTTF flag (-m) has been given: ignoring time specifications and calculation commands");
 	}
 	if (mttf) {
 		calcImca = true;
 		calcCommandSet = true;
-		calcCommand = "-et " + imcaMinMax + imcaEb;
+		calcCommand = "-et -max" + imcaEb;
 		timeIntervalSet = false;
 		timeSpecSet = false;
 	}
@@ -917,7 +854,7 @@ int main(int argc, char** argv) {
 		}
 		calcImca = true;
 		calcCommandSet = true;
-		calcCommand = "" + imcaMinMax + " -tb -F " +timeLwb + " -T " + timeUpb + imcaEb;
+		calcCommand = "-max -tb -F " +timeLwb + " -T " + timeUpb + imcaEb;
 		timeIntervalSet = false;
 		timeSpecSet = false;
 	}
@@ -966,8 +903,8 @@ int main(int argc, char** argv) {
 				messageFormatter->reportErrorAt(Location("commandline -t flag"),"Given mission time value is not a non-negative real: "+s);
 			} else {
 				hasValidItems = true;
-				mrmcCommands.push_back(pair<string,string>("P"+mrmcMinMax+" [ tt U[0," + s + "] reach ]", s));
-				imcaCommands.push_back(pair<string,string>("" + imcaMinMax + " -tb -T " + s + imcaEb, s));
+				mrmcCommands.push_back(pair<string,string>("P{>1} [ tt U[0," + s + "] reach ]", s));
+				imcaCommands.push_back(pair<string,string>("-max -tb -T " + s + imcaEb, s));
 			}
 		}
 		if (!hasInvalidItems && !hasValidItems) {
@@ -998,12 +935,12 @@ int main(int argc, char** argv) {
 		for(double n=lwb; normalize(n) <= normalize(upb); n+= step) {
 			hasItems = true;
 			std::string s = doubleToString(n);
-			mrmcCommands.push_back(pair<string,string>("P"+mrmcMinMax+" [ tt U[0," + s + "] reach ]", s));
+			mrmcCommands.push_back(pair<string,string>("P{>1} [ tt U[0," + s + "] reach ]", s));
 		}
 		std::string s_from = doubleToString(lwb);
 		std::string s_to = doubleToString(upb);
 		std::string s_step = doubleToString(step);
-		imcaCommands.push_back(pair<string,string>("" + imcaMinMax + " -tb -b " + s_from + " -T " + s_to + " -i "+s_step + imcaEb, "?"));
+		imcaCommands.push_back(pair<string,string>("-max -tb -b " + s_from + " -T " + s_to + " -i "+s_step + imcaEb, "?"));
 		if (!hasItems && !intervalErrorReported) {
 			messageFormatter->reportErrorAt(Location("commandline -i flag"),"Given interval is empty (lwb > upb)");
 		}
@@ -1057,7 +994,7 @@ int main(int argc, char** argv) {
 	for(File dft: dfts) {
 		hasInput = true;
 		if(FileSystem::exists(dft)) {
-			bool res = calc.calculateDFT(reuse, outputFolderFile.getFileRealPath(),dft,(calcImca?imcaCommands:mrmcCommands),settings,calcImca, warnNonDeterminism);
+			bool res = calc.calculateDFT(reuse, outputFolderFile.getFileRealPath(),dft,(calcImca?imcaCommands:mrmcCommands),settings,calcImca);
 			hasErrors = hasErrors || res;
 		} else {
 			messageFormatter->reportError("DFT File `" + dft.getFileRealPath() + "' does not exist");
