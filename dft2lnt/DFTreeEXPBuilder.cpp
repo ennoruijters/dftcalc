@@ -274,7 +274,7 @@ int DFT::DFTreeEXPBuilder::buildEXPBody(vector<DFT::EXPSyncRule*>& activationRul
 		calculateColumnWidths(columnWidths,failRules);
 		calculateColumnWidths(columnWidths,successRules);
 
-		exp_body << exp_body.applyprefix << "label par" << exp_body.applypostfix;
+		exp_body << exp_body.applyprefix << "label par using" << exp_body.applypostfix;
 		exp_body << exp_body.applyprefix << "(*\t";
 		std::vector<DFT::Nodes::Node*>::const_iterator it = dft->getNodes().begin();
 		for(int c=0;it!=dft->getNodes().end();++it,++c) {
