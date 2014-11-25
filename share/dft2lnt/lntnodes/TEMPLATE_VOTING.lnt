@@ -1,16 +1,20 @@
 module TEMPLATE_VOTING(TEMPLATE_COMMON) is
 
-	process VOTING [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL] (threshold : NAT, total : NAT, received : BOOL_ARRAY) is
+	process VOTING [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, SUCC : NAT_CHANNEL] (threshold : NAT, total : NAT, received : BOOL_ARRAY) is
 	var
 		nr : NAT,
 		done : BOOL,
-		nr_act : NAT
+		nr_act : NAT,
+		succ : NAT,
+		success : BOOL
 	in
 		nr_act := 0;
 		done := FALSE;
+		succ := 0;
+		success := FALSE;
 		loop
 			select
-			
+
 			(*
 			 * Listen for any child to be triggered.
 			 * If this happens, we remember this by setting the boolean
@@ -19,20 +23,37 @@ module TEMPLATE_VOTING(TEMPLATE_COMMON) is
 				FAIL (?nr) where (0 < nr) and (nr <= total);
 				if not (received[nr]) and (threshold > 0) then
 					received[nr] := TRUE;
-					threshold := threshold - 1
+					threshold := threshold - 1 of NAT
 				end if
-			
+
+			(*
+			* If a child succeeded, the attacker failed
+			*)
+			[]
+				SUCC (?nr)  where (0 < nr) and (nr <= total);
+				if (not (received[nr]) and (not (done)) and (not (success))) then
+					received[nr] := TRUE;
+					succ := succ + 1 of NAT
+				end if;
+				nr := 0
+
 			(*
 			 * If the threshold reaches 0, this means the threshold number
 			 * of children have failed out of the total number of children.
 			 * Thus, the Voting node fails and notifies its parents.
 			 *)
 			[]
-				if (threshold == 0) and not (done) then
+				if (threshold == 0) and not (done) and not (success) then
 					FAIL (!0 of NAT); done := TRUE
 				end if;
 				nr := 0
-			
+
+			[]
+				if ((total - threshold) < succ) and not (success) and not (done) then
+					SUCC (!0 of NAT); success := TRUE
+				end if;
+				nr := 0
+
 			(*
 			 * If this node is activated, enable the activation procedure.
 			 *)
@@ -41,7 +62,7 @@ module TEMPLATE_VOTING(TEMPLATE_COMMON) is
 				if (nr_act == 0 of NAT) then
 					nr_act := 1 of NAT
 				end if
-			
+
 			(*
 			 * If the children should be activated, do so, one by one,
 			 * from left to right.
@@ -63,5 +84,4 @@ module TEMPLATE_VOTING(TEMPLATE_COMMON) is
 	end process
 
 
-end module 
-
+end module
