@@ -7,16 +7,18 @@ module TEMPLATE_SEQOR(TEMPLATE_COMMON) is
 		act  : BOOL,
 		success : BOOL,
 		nr : NAT,
-		nr_act: NAT
+		nr_act: NAT,
+		activated : Bool
 	in
 		done := FALSE;
 		act  := FALSE;
 		success := FALSE;
 		failed := FALSE;
-		nr_act := 0 of NAT;
+		nr_act := 1 of NAT;
+		activated := FALSE;
 		loop
 			select
-			
+
 			(*
 			 * If a child succeeded, go to the next child
 			 * Start the Activation procedure for the succeeding child
@@ -27,7 +29,7 @@ module TEMPLATE_SEQOR(TEMPLATE_COMMON) is
 					ACTIVATE (!nr_act,TRUE)
 				end if;
 				nr := 0
-			
+
 			(*
 			 * If the last child succeeded, no FAILURE signal is generated
 			 * We reach an absorbing state
@@ -55,9 +57,10 @@ module TEMPLATE_SEQOR(TEMPLATE_COMMON) is
 			 *)
 			[]
 				ACTIVATE (?nr,FALSE) where (nr == (0 of NAT));
-				if ((nr_act == 0) and (not (done))) then
-					nr_act := 1 of NAT;
-					ACTIVATE (!nr_act,TRUE)
+				if (not(activated) and (not (done))) then
+					(*nr_act := 1 of NAT;*)
+					ACTIVATE (!nr_act,TRUE);
+					activated := TRUE
 				end if;
 				nr := 0
 
@@ -75,5 +78,4 @@ module TEMPLATE_SEQOR(TEMPLATE_COMMON) is
 	end process
 
 
-end module 
-
+end module
