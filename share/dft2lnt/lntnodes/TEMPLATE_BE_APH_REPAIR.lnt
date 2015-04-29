@@ -45,7 +45,7 @@ module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 			 * If the failure event is triggered, go into the FAILED state.
 			 *)
 			[]
-				if ((not (cold)) and ((status == UP)) then
+				if ((not (cold)) and (status == UP)) then
 					RATE_FAIL (!1 of NAT,1 of NAT);
 					degenerated := degenerated-1;
 					if (degenerated < 1) then
@@ -60,7 +60,7 @@ module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 			 * If the failure event is triggered, go into the FAILED state.
 			 *)
 			[]
-				if ((status == ACTIVE)) then
+				if (status == ACTIVE) then
 					RATE_FAIL (!1 of NAT,2 of NAT);
 					degenerated := degenerated-1;
 					if (degenerated < 1) then
