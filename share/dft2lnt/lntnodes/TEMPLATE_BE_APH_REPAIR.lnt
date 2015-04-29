@@ -45,11 +45,26 @@ module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 			 * If the failure event is triggered, go into the FAILED state.
 			 *)
 			[]
-				if ((not (cold)) and ((status == UP) or (status == AVAILABLE_INACTIVE))) then
+				if ((not (cold)) and ((status == UP)) then
 					RATE_FAIL (!1 of NAT,1 of NAT);
 					degenerated := degenerated-1;
 					if (degenerated < 1) then
 						status := FAILED_INACTIVE
+					end if
+				end if
+
+			(*
+			 * When this BE is in the UP state, it can fail with the
+			 * failure rate associated with this state. The rate is later
+			 * introduced using renaming of RATE_FAIL !1 !1.
+			 * If the failure event is triggered, go into the FAILED state.
+			 *)
+			[]
+				if ((status == ACTIVE)) then
+					RATE_FAIL (!1 of NAT,2 of NAT);
+					degenerated := degenerated-1;
+					if (degenerated < 1) then
+						status := FAILED_ACTIVE
 					end if
 				end if
 
