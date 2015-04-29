@@ -1,6 +1,6 @@
 module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 
-	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL, REPAIR : NAT_CHANNEL, REPAIRED : NAT_BOOL_CHANNEL, INSPECT : NAT_CHANNEL, INSPECTED : NAT_BOOL_CHANNEL, ONLINE : NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS, phases: NAT, threshold : NAT) is
+	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL, REPAIR : NAT_CHANNEL, REPAIRED : NAT_BOOL_CHANNEL, ONLINE : NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS, phases: NAT) is
 	var
 		status : STATUS,
 		nr : NAT,
@@ -36,9 +36,6 @@ module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 				if (status == REPAIRING_INACTIVE) then
 					status := REPAIRING_ACTIVE
 				end if;
-				if (status == INSPECTING_INACTIVE) then
-					status := INSPECTING_ACTIVE
-				end if;
 				nr := 0
 
 			(*
@@ -48,7 +45,7 @@ module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 			 * If the failure event is triggered, go into the FAILED state.
 			 *)
 			[]
-				if ((not (cold)) and ((status == UP) or (status == INSPECTING_INACTIVE))) then
+				if ((not (cold)) and ((status == UP) or (status == AVAILABLE_INACTIVE))) then
 					RATE_FAIL (!1 of NAT,1 of NAT);
 					degenerated := degenerated-1;
 					if (degenerated < 1) then
@@ -56,33 +53,6 @@ module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 					end if
 				end if
 
-
-			[]
-				if ((not (cold)) and (status == UP) and ((phases-degenerated) >= threshold)) then
-					INSPECT (!0 of NAT);
-					status := INSPECTING_INACTIVE
-				end if
-
-			(*
-			 * When this BE is in the ACTIVE state, it can fail with the
-			 * failure rate associated with this state. The rate is later
-			 * introduced using renaming of RATE_FAIL !1 !2.
-			 * If the failure event is triggered, go into the FAILED state.
-			 *)
-			[]
-				if ((status == ACTIVE) or (status == INSPECTING_ACTIVE)) then
-					RATE_FAIL (!1 of NAT,2 of NAT);
-					degenerated := degenerated-1;
-					if (degenerated < 1) then
-						status := FAILED_ACTIVE
-					end if
-				end if
-
-			[]
-				if ((status == ACTIVE) and ((phases-degenerated) >= threshold)) then
-					INSPECT (!0 of NAT);
-					status := INSPECTING_ACTIVE
-				end if
 
 			(*
 			 * When this BE is in the FAILED state (caused by one of the
@@ -126,23 +96,13 @@ module TEMPLATE_BE_APH_REPAIR(TEMPLATE_COMMON_APH_REPAIR) is
 				if ((status == REPAIRING_INACTIVE)) then
 					status := AVAILABLE_INACTIVE
 				end if;
-			-- listen if there was a replacement due to inspection active branch
-				if ((status == ACTIVE) or (status == INSPECTING_ACTIVE)) then
-					degenerated := phases;
-					status := ACTIVE
-				end if;
-			-- listen if there was a replacement due to inspection inactive branch
-				if ((status == UP) or (status == INSPECTING_INACTIVE)) then
-					degenerated := phases;
-					status := UP
-				end if;
 				nr := 0
 
 
 			(*
 			 * When this BE is in the UNAVAILABLE state,
 			 * wait until it is repaired using REP ?0.
-			 * After this, go into the AILABLE state.
+			 * After this, go into the AVAILABLE state.
 			 *)
 			[]
 				if (status == UNAVAILABLE_ACTIVE) then
