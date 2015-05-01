@@ -21,7 +21,7 @@ private:
 	std::vector<Node*> children;
 	int repairableChildren;
 	bool active;
-	bool initialized = false;
+	bool initialized;
 // protected:
 // 	Gate(Location loc, std::string name, DFT::Nodes::NodeType nodeType): Node(loc,name,nodeType) {
 // 	}
@@ -58,6 +58,7 @@ public:
 	void setRepairableChildren(int nr) { repairableChildren=nr; }
 
 	Gate(Location loc, std::string name, DFT::Nodes::NodeType nodeType): Node(loc,name,nodeType) {
+		 initialized(false)
 	}
 	virtual ~Gate() {
 	}
