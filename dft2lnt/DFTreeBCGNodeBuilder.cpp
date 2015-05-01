@@ -471,16 +471,10 @@ int DFT::DFTreeBCGNodeBuilder::generateBE(FileWriter& out, const DFT::Nodes::Bas
 	bool aph = be.getPhases()>1;
 	bool aph_insp = (be.getInterval()>0 && aph);
 	// new boolean variable for repairable BE
-<<<<<<< HEAD
     bool aph_repair = (be.getRepair()>0 && aph);
     bool repair=false;
     if (!aph_repair)
         repair = be.getRepair() > 0;
-    
-=======
-	bool repair = be.getRepair() > 0;
-
->>>>>>> origin/smart-semantics
     // check if it is maintainabel
     bool maintain = be.getMaintain() > 0;
 
@@ -495,18 +489,12 @@ int DFT::DFTreeBCGNodeBuilder::generateBE(FileWriter& out, const DFT::Nodes::Bas
 	out << out.applyprefix << " * Generating BE(parents=" << nr_parents << ")" << out.applypostfix;
 	generateHeaderClose(out);
 	out << out.applyprefix << "module " << getFileForNode(be) << "(TEMPLATE_BE";
-<<<<<<< HEAD
-	// use repair template if  repairable
-	out << (repair?"_REPAIR) is":maintain?"_MAINTAIN_APH) is":aph_insp?"_APH_INSP) is":aph_repair?"_APH_REPAIR) is":aph?"_APH) is":") is") << out.applypostfix;
-=======
 	if(be.isActive()){
 		out << "_ACTIVE) is";
 	} else{
-		// use repair template if  repairable
-		out << (repair?"_REPAIR) is":maintain?"_MAINTAIN_APH) is":aph_repair?"_APH_INSP) is":aph?"_APH) is":") is") << out.applypostfix;
+        // use repair template if  repairable
+        out << (repair?"_REPAIR) is":maintain?"_MAINTAIN_APH) is":aph_insp?"_APH_INSP) is":aph_repair?"_APH_REPAIR) is":aph?"_APH) is":") is") << out.applypostfix;
 	}
-
->>>>>>> origin/smart-semantics
 	out.appendLine("");
 	out.indent();
 		if(be.isActive())
