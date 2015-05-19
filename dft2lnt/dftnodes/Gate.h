@@ -27,7 +27,6 @@ protected:
 	int repairableChildren;
 	bool active;
 	bool initialized;
-
 public:
 	/**
 	 * Returns the list of children of this Gate.

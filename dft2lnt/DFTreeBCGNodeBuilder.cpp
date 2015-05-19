@@ -592,7 +592,6 @@ int DFT::DFTreeBCGNodeBuilder::generateBE(FileWriter& out, const DFT::Nodes::Bas
     if(!dummy){
         out << out.applyprefix << " * Generating BE(parents=" << nr_parents << ")" << out.applypostfix;
         generateHeaderClose(out);
-        
         out << out.applyprefix << "module " << getFileForNode(be) << "(TEMPLATE_BE";
         if(be.isActive()){
             out << "_ACTIVE) is";
