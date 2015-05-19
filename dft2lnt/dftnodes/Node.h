@@ -153,23 +153,33 @@ private:
 	Location location;
 	string name;
 	NodeType type;
+    bool repairable;
 	
 	/// List of parents, instances are freed by DFTree instance.
 	std::vector<Nodes::Node*> parents;
 public:
-	Node(Location location, NodeType type):
-		location(location),
-		type(type) {
-	}
-	Node(Location location, std::string name, NodeType type):
-		location(location),
-		name(name),
-		type(type) {
-	}
-	Node() {
-	}
-	virtual ~Node() {
-	}
+    Node(Location location, NodeType type):
+        location(location),
+        type(type),
+        repairable(false){
+    }
+    Node(Location location, std::string name, NodeType type):
+        location(location),
+        name(name),
+        type(type),
+        repairable(false){
+    }
+    Node(Location location, std::string name, NodeType type, bool repairable):
+        location(location),
+        name(name),
+        type(type),
+        repairable(repairable){
+    }
+    Node() {
+    }
+    virtual ~Node() {
+    }
+
 	
 	/**
 	 * Returns the name of this Node.
@@ -215,7 +225,18 @@ public:
 	 * @return The type of this Node.
 	 */
 	virtual const std::string& getTypeStr() const { return getTypeName(getType()); }
+    
+    void setRepairable(bool repair) { repairable=repair; }
+    const void setRepairable(bool repair) const { setRepairable(repairable); }
 	
+    /**
+     * returns if gate is repairable
+     * @return True if repairable, otherwise false
+     */
+    virtual bool isRepairable() const {
+        return repairable;
+    }
+    
 	/**
 	 * Returns whether this Node is a BasicEvent, i.e. typeMatch(type,BasicEventType).
 	 * @return true: this node is a BasicEvent, false otherwise

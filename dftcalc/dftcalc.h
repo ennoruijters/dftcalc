@@ -25,20 +25,21 @@ namespace DFT {
 		/// The -T<buildDot> argument passed to dot
 		std::string buildDot;
 		
-		MessageFormatter* messageFormatter;
-		std::string dft2lntRoot;
-		std::string coralRoot;
-		std::string imcaRoot;
-		std::string cadpRoot;
-		File dft2lntcExec;
-		File coralExec;
-		File imc2ctmdpExec;
-		File bcg2imcaExec;
-		File svlExec;
-		File bcgioExec;
-		File mrmcExec;
-		File imcaExec;
-		File dotExec;
+        MessageFormatter* messageFormatter;
+        std::string dft2lntRoot;
+        std::string coralRoot;
+        std::string imcaRoot;
+        std::string cadpRoot;
+        File dft2lntcExec;
+        File coralExec;
+        File imc2ctmdpExec;
+        File bcg2imcaExec;
+        File svlExec;
+        File bcgioExec;
+        File bcginfoExec;
+        File mrmcExec;
+        File imcaExec;
+        File dotExec;
 		
 		std::string getCoralRoot(MessageFormatter* messageFormatter);
 		std::string getImcaRoot(MessageFormatter* messageFormatter);
@@ -298,7 +299,8 @@ namespace DFT {
 		 * @param dft The DFT to calculate
 		 * @return 0 if successful, non-zero otherwise
 		 */
-		int calculateDFT(const bool reuse, const std::string& cwd, const File& dft, const std::vector<std::pair<std::string,std::string>>& timeSpec, unordered_map<string,string> settings,  bool calcImca);
+        int calculateDFT(const bool reuse, const std::string& cwd, const File& dft, const std::vector<std::pair<std::string,std::string>>& timeSpec,
+                         unordered_map<string,string> settings,  bool calcImca, bool warnNonDeterminism);
 		
 		void setEvidence(const std::vector<std::string>& evidence) {this->evidence = evidence;}
 		const std::vector<std::string>& getEvidence() const {return evidence;}

@@ -35,6 +35,12 @@ public:
 	std::vector<Node*>& getChildren() { return children; }
 	const std::vector<Node*>& getChildren() const { return const_cast<const std::vector<Node*>&>(children); }
 
+    /**
+     * Returns the list of repairable children of this Gate.
+     * @return The list of repairable children of this Gate.
+     */
+    const int getRepairableChildren() const{ return repairableChildren; }
+    
 	/**
 	 * Adds the specified Node to this Node's list of children.
 	 * @param child The Node to add to this Node's list of children.

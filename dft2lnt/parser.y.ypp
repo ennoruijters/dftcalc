@@ -106,7 +106,6 @@
 %token<c_string> PHASEDOR
 %token<c_string> OR
 %token<c_string> AND
-%token<c_string> PRIO
 %token<c_string> SEQAND
 %token<c_string> SEQOR
 %token<c_string> SAND
