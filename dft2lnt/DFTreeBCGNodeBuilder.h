@@ -25,12 +25,22 @@ namespace DFT {
 
 class DFTreeBCGNodeBuilder {
 public:
-	static const std::string GATE_FAIL;
-	static const std::string GATE_ACTIVATE;
-	static const std::string GATE_REPAIR;
-	static const std::string GATE_RATE_FAIL;
-	static const std::string GATE_RATE_REPAIR;
-	static const std::string GATE_SUCC;
+    static const std::string GATE_FAIL;
+    static const std::string GATE_ACTIVATE;
+    static const std::string GATE_DEACTIVATE;
+    static const std::string GATE_REPAIR;
+    static const std::string GATE_REPAIRED;
+    static const std::string GATE_ONLINE;
+    static const std::string GATE_RATE_FAIL;
+    static const std::string GATE_RATE_MAINTAIN;
+    static const std::string GATE_RATE_REPAIR;
+    static const std::string GATE_RATE_PERIOD;
+    static const std::string GATE_RATE_INSPECTION;
+    static const std::string GATE_REPAIRING;
+    static const std::string GATE_INSPECT;
+    static const std::string GATE_INSPECTED;
+    static const std::string GATE_RESET;
+    static const std::string GATE_SUCC;
 private:
 	static const unsigned int VERSION;
 	static const int VERBOSE_LNTISVALID;
@@ -50,15 +60,24 @@ private:
 	int generateHeaderClose(FileWriter& out);
 
 	int generateAnd(FileWriter& out, const DFT::Nodes::GateAnd& gate);
+    int generateSAnd(FileWriter& out, const DFT::Nodes::GateSAnd& gate);
 	int generateOr(FileWriter& out, const DFT::Nodes::GateOr& gate);
 	int generateVoting(FileWriter& out, const DFT::Nodes::GateVoting& gate);
 	int generatePAnd(FileWriter& out, const DFT::Nodes::GatePAnd& gate);
 	int generatePrio(FileWriter& out, const DFT::Nodes::GatePrio& gate);
 	int generateSEQAnd(FileWriter& out, const DFT::Nodes::GateSEQAnd& gate);
 	int generateSEQOr(FileWriter& out, const DFT::Nodes::GateSEQOr& gate);
+    int generatePor(FileWriter& out, const DFT::Nodes::GatePor& gate);
 	int generateSpare(FileWriter& out, const DFT::Nodes::GateWSP& gate);
 	int generateFDEP(FileWriter& out, const DFT::Nodes::GateFDEP& gate);
 	int generateBE(FileWriter& out, const DFT::Nodes::BasicEvent& gate);
+	int generateRU(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
+	int generateRU_FCFS(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
+	int generateRU_Prio(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
+	int generateRU_Nd(FileWriter& out, const DFT::Nodes::RepairUnit& gate);
+    
+    int generateInspection(FileWriter& out, const DFT::Nodes::Inspection& gate);
+    int generateReplacement(FileWriter& out, const DFT::Nodes::Replacement& gate);
 
 	int generateSVLBuilder(FileWriter& out, std::string fileName);
 	int executeSVL(std::string root, std::string fileName);
@@ -99,7 +118,7 @@ public:
 	
 	/**
 	 * Writes the contents of the specified FileWriter to the file at the
-	 * specified path. It will report warnings to the CompilerContext known to
+	 * specified path. It will rePort warnings to the CompilerContext known to
 	 * this instance.
 	 * @param filePath Path to the file to write to
 	 * @param fw FileWriter of which the contents will be written to the file.

@@ -31,11 +31,13 @@ enum NodeType {
 	GatePhasedOrType,
 	GateOrType,
 	GateAndType,
+    GateSAndType,
 	GateHSPType,
 	GateWSPType,
 	GateCSPType,
 	GatePAndType,
 	GateSeqType,
+    GatePorType,
 	GateVotingType,
 	GateFDEPType,
 	GatePrioType,
@@ -43,9 +45,17 @@ enum NodeType {
 	GateSEQOrType,
 	GateTransferType,
 
+	RepairUnitType,
+	RepairUnitFcfsType,
+	RepairUnitPrioType,
+	RepairUnitNdType,
+
+    InspectionType,
+    ReplacementType,
+    
 	GateType,
 	GATES_FIRST = GatePhasedOrType,
-	GATES_LAST  = GateTransferType,
+	GATES_LAST  = ReplacementType,
 	
 	AnyType,
 	NUMBEROF
@@ -59,15 +69,23 @@ public:
 	static const std::string BasicEventStr;
 	static const std::string BasicStepStr;
 	static const std::string GateAndStr;
+    static const std::string GateSAndStr;
 	static const std::string GateOrStr;
 	static const std::string GateWSPStr;
 	static const std::string GatePAndStr;
+    static const std::string GatePorStr;
 	static const std::string GateVotingStr;
 	static const std::string GateFDEPStr;
 	static const std::string GatePrioStr;
 	static const std::string GateSEQAndStr;
 	static const std::string GateSEQOrStr;
 	static const std::string UnknownStr;
+	static const std::string RepairUnitStr;
+	static const std::string RepairUnitFcfsStr;
+	static const std::string RepairUnitPrioStr;
+	static const std::string RepairUnitNdStr;
+    static const std::string InspectionStr;
+    static const std::string ReplacementStr;
 	
 	/**
 	 * Returns the textual representation of the specified NodeType.
@@ -79,12 +97,16 @@ public:
 			return BasicEventStr;
 		case GateAndType:
 			return GateAndStr;
+        case GateSAndType:
+            return GateSAndStr;
 		case GateOrType:
 			return GateOrStr;
 		case GateWSPType:
 			return GateWSPStr;
 		case GatePAndType:
 			return GatePAndStr;
+        case GatePorType:
+            return GatePorStr;
 		case GateVotingType:
 			return GateVotingStr;
 		case GatePrioType:
@@ -95,6 +117,18 @@ public:
 			return GateSEQOrStr;
 		case GateFDEPType:
 			return GateFDEPStr;
+		case RepairUnitType:
+			return RepairUnitStr;
+		case RepairUnitFcfsType:
+			return RepairUnitFcfsStr;
+		case RepairUnitPrioType:
+			return RepairUnitPrioStr;
+		case RepairUnitNdType:
+			return RepairUnitNdStr;
+        case InspectionType:
+            return InspectionStr;
+        case ReplacementType:
+            return ReplacementStr;
 		default:
 			return UnknownStr;
 		}

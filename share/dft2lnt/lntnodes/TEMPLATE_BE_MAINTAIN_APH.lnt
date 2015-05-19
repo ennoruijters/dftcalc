@@ -1,12 +1,14 @@
-module TEMPLATE_BE(TEMPLATE_COMMON) is
+module TEMPLATE_BE_MAINTAIN_APH(TEMPLATE_COMMON) is
 
-	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS) is
+	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS, phases: NAT) is
 	var
 		status : STATUS,
-		nr : NAT
+		nr : NAT,
+		full : NAT
 	in
 		status := initial;
 		nr := 0;
+		full := phases;
 		loop
 			select
 
@@ -30,7 +32,10 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 
 				if ((not (cold)) and (status == DORMANT)) then
 					RATE_FAIL (!1 of NAT,1 of NAT);
-					status := FAILING
+					phases := phases-1;
+					if (phases < 1) then
+						status := FAILING
+					end if
 				end if
 
 			(*
@@ -42,7 +47,35 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 			[]
 				if (status == ACTIVE) then
 					RATE_FAIL (!1 of NAT,2 of NAT);
-					status := FAILING
+					phases := phases-1;
+					if (phases < 1) then
+						status := FAILING
+					end if
+				end if
+
+		   (*
+			* When this BE is in the DORMANT state, it can fail with the
+			* failure rate associated with this state. The rate is later
+			* introduced using renaming of RATE_FAIL !1 !1.
+			* If the failure event is trigger, go into the FAILING state.
+			*)
+			[]
+
+				if ((not (cold)) and (status == DORMANT) and (phases < full)) then
+					RATE_FAIL (!1 of NAT,3 of NAT);
+					phases := phases+1
+				end if
+
+			(*
+			* When this BE is in the ACTIVE state, it can fail with the
+			* failure rate associated with this state. The rate is later
+			* introduced using renaming of RATE_FAIL !1 !2.
+			* If the failure event is trigger, go into the FAILING state.
+			*)
+			[]
+				if ((status == ACTIVE) and (phases < full)) then
+					RATE_FAIL (!1 of NAT,4 of NAT);
+					phases := phases+1
 				end if
 
 			(*

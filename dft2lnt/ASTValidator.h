@@ -258,6 +258,80 @@ public:
 					cc->reportErrorAt(attribute->getLocation(),"dorm label needs float value");
 				}
 				break;
+            // check for new maintain label
+            case DFT::Nodes::BE::AttrLabelMaintain:
+                if(!value) {
+                    valid = false;
+                    cc->reportErrorAt(attribute->getLocation(),"maintain label without value");
+                    break;
+                }
+                if(value->isFloat()) {
+                    float v = static_cast<DFT::AST::ASTAttribFloat*>(value)->getValue();
+                    if(v < 0) {
+                        valid = false;
+                        cc->reportErrorAt(attribute->getLocation(),"negative maintain");
+                    }
+                } else if(value->isNumber()) {
+                    int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+                    if(v < 0) {
+                        valid = false;
+                        cc->reportErrorAt(attribute->getLocation(),"negative maitntain");
+                    }
+                } else {
+                    valid = false;
+                    cc->reportErrorAt(attribute->getLocation(),"maintain label needs float value");
+                }
+                break;
+
+			// check for new repair label
+			case DFT::Nodes::BE::AttrLabelRepair:
+				if(!value) {
+					valid = false;
+					cc->reportErrorAt(attribute->getLocation(),"repair label without value");
+					break;
+				}
+				if(value->isFloat()) {
+					float v = static_cast<DFT::AST::ASTAttribFloat*>(value)->getValue();
+					if(v < 0) {
+						valid = false;
+						cc->reportErrorAt(attribute->getLocation(),"negative repair");
+					}
+				} else if(value->isNumber()) {
+					int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+					if(v < 0) {
+						valid = false;
+						cc->reportErrorAt(attribute->getLocation(),"negative repair");
+					}
+				} else {
+					valid = false;
+					cc->reportErrorAt(attribute->getLocation(),"repair label needs float value");
+				}
+                break;
+			// check for new priority label
+			case DFT::Nodes::BE::AttrLabelPrio:
+				if(!value) {
+					valid = false;
+					cc->reportErrorAt(attribute->getLocation(),"priority label without value");
+					break;
+				}
+				if(value->isNumber()) {
+					int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+					if(v < 0) {
+						valid = false;
+						cc->reportErrorAt(attribute->getLocation(),"negative priority");
+					}
+				} else if(value->isFloat()) {
+					int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+					if(v < 0) {
+						valid = false;
+						cc->reportErrorAt(attribute->getLocation(),"negative priority");
+					}
+				} else {
+					valid = false;
+					cc->reportErrorAt(attribute->getLocation(),"priority label needs integer value");
+				}
+                break;
+            // check for APH label
 			case DFT::Nodes::BE::AttrLabelAph:
 				if(!value) {
 					valid = false;
@@ -283,6 +357,54 @@ public:
 					cc->reportErrorAt(attribute->getLocation(),"aph label needs string value: name of .bcg distribution file to embed");
 				}
 				break;
+            // check for PHASES label
+            case DFT::Nodes::BE::AttrLabelPhases:
+                if(!value) {
+                    valid = false;
+                    cc->reportErrorAt(attribute->getLocation(),"phases label without value");
+                    break;
+                }
+                if(value->isNumber()) {
+                    int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+                    if(v < 1) {
+                        valid = false;
+                        cc->reportErrorAt(attribute->getLocation(),"no valid phases specified");
+                    }
+                } else if(value->isFloat()) {
+                    int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+                    if(v < 0) {
+                        valid = false;
+                        cc->reportErrorAt(attribute->getLocation(),"no valid phases specified");
+                    }
+                } else {
+                    valid = false;
+                    cc->reportErrorAt(attribute->getLocation(),"phases label needs integer value");
+                }
+                break;
+			// check for INTERVAL label
+            case DFT::Nodes::BE::AttrLabelInterval:
+                if(!value) {
+                    valid = false;
+                    cc->reportErrorAt(attribute->getLocation(),"interval label without value");
+                    break;
+                }
+                if(value->isNumber()) {
+                    int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+                    if(v < 1) {
+                        valid = false;
+                        cc->reportErrorAt(attribute->getLocation(),"no valid interval specified");
+                    }
+                } else if(value->isFloat()) {
+                    int v = static_cast<DFT::AST::ASTAttribNumber*>(value)->getValue();
+                    if(v < 0) {
+                        valid = false;
+                        cc->reportErrorAt(attribute->getLocation(),"no valid interval specified");
+                    }
+                } else {
+                    valid = false;
+                    cc->reportErrorAt(attribute->getLocation(),"interval label needs integer value");
+                }
+                break;
 
 			case DFT::Nodes::BE::AttrLabelProb:
 				if(!value) {

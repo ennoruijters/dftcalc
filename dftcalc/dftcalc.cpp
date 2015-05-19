@@ -44,77 +44,82 @@ const int VERBOSITY_DATA = 1;
 const int VERBOSITY_EXECUTIONS = 2;
 
 void print_help(MessageFormatter* messageFormatter, string topic="") {
-	if(topic.empty()) {
-		messageFormatter->notify ("dftcalc [INPUTFILE.dft] [options]");
-		messageFormatter->message("  Calculates the failure probability for the specified DFT file, given the");
-		messageFormatter->message("  specified time constraints. Result is written to the specified output file.");
-		messageFormatter->message("  Check dftcalc --help=output for more details regarding the output.");
-		messageFormatter->message("");
-		messageFormatter->notify ("General Options:");
-		messageFormatter->message("  -h, --help      Show this help.");
-		messageFormatter->message("  --color         Use colored messages.");
-		messageFormatter->message("  --no-color      Do not use colored messages.");
-		messageFormatter->message("  --version       Print version info and quit.");
-		messageFormatter->message("  -O<s>=<v>       Sets settings <s> to value <v>. (see --help=settings)");
-		messageFormatter->message("  -R              Reuse existing output files.");
-		messageFormatter->message("  --mrmc          Use MRMC. (standard setting)");
-		messageFormatter->message("  --imca          Use IMCA instead of MRMC.");
-		messageFormatter->message("");
-		messageFormatter->notify ("Debug Options:");
-		messageFormatter->message("  --verbose=x     Set verbosity to x, -1 <= x <= 5.");
-		messageFormatter->message("  -v, --verbose   Increase verbosity. Up to 5 levels.");
-		messageFormatter->message("  -q              Decrease verbosity.");
-		messageFormatter->message("");
-		messageFormatter->notify ("Output Options:");
-		messageFormatter->message("  -r FILE         Output result in YAML format to this file. (see --help=output)");
-		messageFormatter->message("  -c FILE         Output result as CSV format to this file. (see --help=output)");
-		messageFormatter->message("  -p              Print result to stdout.");
-		messageFormatter->message("  -e evidence     Comma separated list of BE names that fail at startup.");
-		messageFormatter->message("  -m              Calculate mean time to failure using IMCA.");
-		messageFormatter->message("                  Overrules -i, -t, -f, --mrmc.");
-		messageFormatter->message("  -i l u s        Calculate P(DFT fails in [0,x] time units) for each x in interval,");
-		messageFormatter->message("                  where interval is given by [l .. u] with step s ");
-		messageFormatter->message("  -t xList        Calculate P(DFT fails in [0,x] time units) for each x in xList,");
-		messageFormatter->message("                  where xList is a whitespace-separated list of values, default is \"1\"");
-		messageFormatter->message("  -I l u          Calculate P(DFT fails in [l,u] time units) where l can be >= 0");
-		messageFormatter->message("  -f <command>    Raw Calculation formula for MRMC or IMCA. Overrules -t.");
-		messageFormatter->message("                  See --mrmc and --imca");
-		messageFormatter->message("  -E errorbound   Error bound, to be passed to IMCA.");
-		messageFormatter->message("  -C DIR          Temporary output files will be in this directory");
-		messageFormatter->flush();
-	} else if(topic=="output") {
-		messageFormatter->notify ("Output");
-		messageFormatter->message("  The output file specified with -r uses YAML syntax.");
-		messageFormatter->message("  The top node is a map, containing one element, a mapping containing various");
-		messageFormatter->message("  information regarding the DFT. E.g. it looks like this:");
-		messageFormatter->message("  b.dft:");
-		messageFormatter->message("    dft: b.dft");
-		messageFormatter->message("    failprob: 0.3934693");
-		messageFormatter->message("    stats:");
-		messageFormatter->message("      time_user: 0.54");
-		messageFormatter->message("      time_system: 0.21");
-		messageFormatter->message("      time_elapsed: 1.8");
-		messageFormatter->message("      mem_virtual: 13668");
-		messageFormatter->message("      mem_resident: 1752");
-		messageFormatter->message("  The Calculation command can be manually set using -f.");
-		messageFormatter->message("  For MRMC the default is:");
-		messageFormatter->message("    P{>1} [ tt U[0,n] reach ]");
-		messageFormatter->message("  and for IMCA the default is:");
-		messageFormatter->message("    -max -tb -T n");
-		messageFormatter->message("  where n is the mission time (specified via -t or -i), default is 1.");
-	} else if(topic=="settings") {
-		messageFormatter->notify ("Settings");
-		messageFormatter->message("  Use the format -Ok=v,k=v,k=v or specify multiple -O ");
-		messageFormatter->message("  Some key values:");
-		messageFormatter->message("");
-	} else if(topic=="topics") {
-		messageFormatter->notify ("Help topics:");
-		messageFormatter->message("  output          Displays the specification of the output format");
-		messageFormatter->message("  To view topics: dftcalc --help=<topic>");
-		messageFormatter->message("");
-	} else {
-		messageFormatter->reportAction("Unknown help topic: " + topic);
-	}		
+    if(topic.empty()) {
+        messageFormatter->notify ("dftcalc [INPUTFILE.dft] [options]");
+        messageFormatter->message("  Calculates the failure probability for the specified DFT file, given the");
+        messageFormatter->message("  specified time constraints. Result is written to the specified output file.");
+        messageFormatter->message("  Check dftcalc --help=output for more details regarding the output.");
+        messageFormatter->message("");
+        messageFormatter->notify ("General Options:");
+        messageFormatter->message("  -h, --help      Show this help.");
+        messageFormatter->message("  --color         Use colored messages.");
+        messageFormatter->message("  --no-color      Do not use colored messages.");
+        messageFormatter->message("  --version       Print version info and quit.");
+        messageFormatter->message("  -O<s>=<v>       Sets settings <s> to value <v>. (see --help=settings)");
+        messageFormatter->message("  -R              Reuse existing output files.");
+        messageFormatter->message("  --mrmc          Use MRMC. (standard setting)");
+        messageFormatter->message("  --imca          Use IMCA instead of MRMC.");
+        messageFormatter->message("  --no-nd-warning Do not warn (but give notice) for non-determinism.");
+        messageFormatter->message("");
+        messageFormatter->notify ("Debug Options:");
+        messageFormatter->message("  --verbose=x     Set verbosity to x, -1 <= x <= 5.");
+        messageFormatter->message("  -v, --verbose   Increase verbosity. Up to 5 levels.");
+        messageFormatter->message("  -q              Decrease verbosity.");
+        messageFormatter->message("");
+        messageFormatter->notify ("Output Options:");
+        messageFormatter->message("  -r FILE         Output result in YAML format to this file. (see --help=output)");
+        messageFormatter->message("  -c FILE         Output result as CSV format to this file. (see --help=output)");
+        messageFormatter->message("  -p              Print result to stdout.");
+        messageFormatter->message("  -e evidence     Comma separated list of BE names that fail at startup.");
+        messageFormatter->message("  -m              Calculate mean time to failure using IMCA.");
+        messageFormatter->message("                  Overrules -i, -t, -f, --mrmc.");
+        messageFormatter->message("  -i l u s        Calculate P(DFT fails in [0,x] time units) for each x in interval,");
+        messageFormatter->message("                  where interval is given by [l .. u] with step s ");
+        messageFormatter->message("  -t xList        Calculate P(DFT fails in [0,x] time units) for each x in xList,");
+        messageFormatter->message("                  where xList is a whitespace-separated list of values, default is \"1\"");
+        messageFormatter->message("  -I l u          Calculate P(DFT fails in [l,u] time units) where l can be >= 0");
+        messageFormatter->message("  -f <command>    Raw Calculation formula for MRMC or IMCA. Overrules -t.");
+        messageFormatter->message("                  See --mrmc and --imca");
+        messageFormatter->message("  -E errorbound   Error bound, to be passed to IMCA.");
+        messageFormatter->message("  -C DIR          Temporary output files will be in this directory");
+        messageFormatter->message("  --min           Compute minimum time-bounded reachability (default)");
+        messageFormatter->message("  --max           Compute maximum time-bounded reachability");
+        messageFormatter->flush();
+    } else if(topic=="output") {
+        messageFormatter->notify ("Output");
+        messageFormatter->message("  The output file specified with -r uses YAML syntax.");
+        messageFormatter->message("  The top node is a map, containing one element, a mapping containing various");
+        messageFormatter->message("  information regarding the DFT. E.g. it looks like this:");
+        messageFormatter->message("  b.dft:");
+        messageFormatter->message("    dft: b.dft");
+        messageFormatter->message("    failprob: 0.3934693");
+        messageFormatter->message("    stats:");
+        messageFormatter->message("      time_user: 0.54");
+        messageFormatter->message("      time_system: 0.21");
+        messageFormatter->message("      time_elapsed: 1.8");
+        messageFormatter->message("      mem_virtual: 13668");
+        messageFormatter->message("      mem_resident: 1752");
+        messageFormatter->message("  The Calculation command can be manually set using -f.");
+        messageFormatter->message("  For MRMC the defaults are:");
+        messageFormatter->message("    P{>1} [ tt U[0,n] reach ]             (default)");
+        messageFormatter->message("    P{<0} [ tt U[0,n] reach ]             (when --max is given)");
+        messageFormatter->message("  and for IMCA the defaults are:");
+        messageFormatter->message("    -min -tb -T n                         (default)");
+        messageFormatter->message("    -max -tb -T n                         (when --max is given)");
+        messageFormatter->message("  where n is the mission time (specified via -t or -i), default is 1.");
+    } else if(topic=="settings") {
+        messageFormatter->notify ("Settings");
+        messageFormatter->message("  Use the format -Ok=v,k=v,k=v or specify multiple -O ");
+        messageFormatter->message("  Some key values:");
+        messageFormatter->message("");
+    } else if(topic=="topics") {
+        messageFormatter->notify ("Help topics:");
+        messageFormatter->message("  output          Displays the specification of the output format");
+        messageFormatter->message("  To view topics: dftcalc --help=<topic>");
+        messageFormatter->message("");
+    } else {
+        messageFormatter->reportAction("Unknown help topic: " + topic);
+    }		
 }
 
 void print_help_output(MessageFormatter* messageFormatter) {
@@ -314,6 +319,16 @@ void DFT::DFTCalc::printOutput(const File& file, int status) {
 	}
 }
 
+bool hasHiddenLabels(const File& file) {
+    std::string* fileContents = FileSystem::load(file);
+    bool res = false;
+    if (fileContents) {
+        res = ((*fileContents).find("no transition with a hidden label", 0) ==  string::npos);
+        delete fileContents;
+    }
+    return res;
+}
+
 int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const File& dftOriginal, const std::vector<std::pair<std::string,std::string>>& calcCommands, unordered_map<string,string> settings, bool calcImca) {
 	File dft    = dftOriginal.newWithPathTo(cwd);
 	File svl    = dft.newWithExtension("svl");
@@ -383,14 +398,15 @@ int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const F
 		   //<< " --warn-code";
         if(!evidence.empty())
         {
-		ss << " -e \"";
-		for(std::string e: evidence) {
-			ss << e << ",";
+            ss << " -e \"";
+            for(std::string e: evidence) {
+                ss << e << ",";
 		}
 		ss << "\"";
         }
 		if (!messageFormatter->usingColoredMessages())
 			ss << " --no-color";
+        ss << " \""    + dft.getFileRealPath() + "\"";
 		sysOps.command = ss.str();
 		result = Shell::system(sysOps);
 
@@ -430,6 +446,36 @@ int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const F
 		messageFormatter->reportWarning("Could not read from svl log file `" + svlLog.getFileRealPath() + "'");
 	}
 	
+    // test for non-determinism
+    messageFormatter->reportAction("Testing for non-determinism...",VERBOSITY_FLOW);
+    sysOps.reportFile = cwd + "/" + dft.getFileBase() + "." + intToString(com  ) + ".bcg_info.report";
+    sysOps.errFile    = cwd + "/" + dft.getFileBase() + "." + intToString(com  ) + ".bcg_info.err";
+    sysOps.outFile    = cwd + "/" + dft.getFileBase() + "." + intToString(com++) + ".bcg_info.out";
+    sysOps.command    = bcginfoExec.getFilePath()
+				+ " -hidden"
+				+ " \""    + bcg.getFileRealPath() + "\""
+				;
+    result = Shell::system(sysOps);
+    
+    if(result || !FileSystem::exists(sysOps.outFile)) {
+        printOutput(File(sysOps.outFile), result);
+        printOutput(File(sysOps.errFile), result);
+        return 1;
+    } else if (messageFormatter->getVerbosity() >= 5) {
+        printOutput(File(sysOps.outFile), result);
+        printOutput(File(sysOps.errFile), result);
+    }
+    
+    if (hasHiddenLabels(File(sysOps.outFile))) {
+        if (warnNonDeterminism) {
+            messageFormatter->reportWarning("Non-determinism detected... you will want to ask for both 'min' and 'max' analysis results!");
+        } else {
+            messageFormatter->notify("Non-determinism detected... you will want to ask for both 'min' and 'max' analysis results!");
+        }
+    } else {
+        messageFormatter->notify("No non-determinism detected.");
+    }
+    
 	if(!calcImca) {
 		if(!reuse || !FileSystem::exists(ctmdpi)) {
 			// bcg -> ctmdpi, lab
@@ -630,38 +676,42 @@ int main(int argc, char** argv) {
 	/* Initialize default settings */
 	unordered_map<string,string> settings = default_settings;
 	
-	/* Command line arguments and their default settings */
-	string timeSpec           = "1";
-	int    timeSpecSet        = 0;
-	string timeIntervalLwb    = "";
-	string timeIntervalUpb    = "";
-	string timeIntervalStep   = "";
-	int    timeIntervalSet    = 0;
-	string timeLwb            = "";
-	string timeUpb            = "";
-	int    timeLwbUpbSet      = 0;
-	string yamlFileName       = "";
-	int    yamlFileSet        = 0;
-	string csvFileName        = "";
-	int    csvFileSet         = 0;
-	string dotToType          = "png";
-	int    dotToTypeSet       = 0;
-	string outputFolder       = "output";
-	int    outputFolderSet    = 0;
-	string calcCommand        = "";
-	int    calcCommandSet     = 0;
-	int    mttf               = 0;
-	string errorBound         = "";
-	int    errorBoundSet      = 0;
-
-	int verbosity            = 0;
-	int print                = 0;
-	int reuse                = 0;
-	int useColoredMessages   = 1;
-	int printHelp            = 0;
-	string printHelpTopic    = "";
-	int printVersion         = 0;
-	bool calcImca = false;
+    /* Command line arguments and their default settings */
+    string timeSpec           = "1";
+    int    timeSpecSet        = 0;
+    string timeIntervalLwb    = "";
+    string timeIntervalUpb    = "";
+    string timeIntervalStep   = "";
+    int    timeIntervalSet    = 0;
+    string timeLwb            = "";
+    string timeUpb            = "";
+    int    timeLwbUpbSet      = 0;
+    string yamlFileName       = "";
+    int    yamlFileSet        = 0;
+    string csvFileName        = "";
+    int    csvFileSet         = 0;
+    string dotToType          = "png";
+    int    dotToTypeSet       = 0;
+    string outputFolder       = "output";
+    int    outputFolderSet    = 0;
+    string calcCommand        = "";
+    int    calcCommandSet     = 0;
+    int    mttf               = 0;
+    string errorBound         = "";
+    int    errorBoundSet      = 0;
+    
+    int verbosity            = 0;
+    bool warnNonDeterminism  = true;
+    int print                = 0;
+    int reuse                = 0;
+    int useColoredMessages   = 1;
+    int printHelp            = 0;
+    string printHelpTopic    = "";
+    int printVersion         = 0;
+    bool calcImca            = false;
+    string imcaMinMax        = "-min";
+    string mrmcMinMax        = "{>1}";
+    int imcaMinMaxSet        = 0;
 	
 	std::vector<std::string> failedBEs;
 	
@@ -781,43 +831,53 @@ int main(int argc, char** argv) {
 				
 			}
 			
-			// --
-			case '-':
-				if(!strncmp("help",optarg,4)) {
-					printHelp = true;
-					if(strlen(optarg)>5 && optarg[4]=='=') {
-						printHelpTopic = string(optarg+5);
-					}
-				} else if(!strcmp("version",optarg)) {
-					printVersion = true;
-				} else if(!strcmp("color",optarg)) {
-					useColoredMessages = true;
-				} else if(!strcmp("times",optarg)) {
-					if(strlen(optarg)>6 && optarg[5]=='=') {
-					} else {
-						printf("%s: --times needs argument\n\n",argv[0]);
-						printHelp = true;
-					}
-				} else if(!strncmp("dot",optarg,3)) {
-					dotToTypeSet = true;
-					if(strlen(optarg)>4 && optarg[3]=='=') {
-						dotToType = string(optarg+4);
-						cerr << "DOT: " << dotToType << endl;
-					}
-				} else if(!strncmp("verbose",optarg,7)) {
-					if(strlen(optarg)>8 && optarg[7]=='=') {
-						verbosity = atoi(optarg+8);
-					} else if(strlen(optarg)==7) {
-						++verbosity;
-					}
-				} else if(!strcmp("no-color",optarg)) {
-					useColoredMessages = false;
-				}
-				if(!strcmp("mrmc",optarg)) {
-					calcImca=false;
-				}else if(!strcmp("imca",optarg)) {
-					calcImca=true;
-				}
+                // --
+            case '-':
+                if(!strncmp("help",optarg,4)) {
+                    printHelp = true;
+                    if(strlen(optarg)>5 && optarg[4]=='=') {
+                        printHelpTopic = string(optarg+5);
+                    }
+                } else if(!strcmp("version",optarg)) {
+                    printVersion = true;
+                } else if(!strcmp("color",optarg)) {
+                    useColoredMessages = true;
+                } else if(!strcmp("times",optarg)) {
+                    if(strlen(optarg)>6 && optarg[5]=='=') {
+                    } else {
+                        printf("%s: --times needs argument\n\n",argv[0]);
+                        printHelp = true;
+                    }
+                } else if(!strncmp("dot",optarg,3)) {
+                    dotToTypeSet = true;
+                    if(strlen(optarg)>4 && optarg[3]=='=') {
+                        dotToType = string(optarg+4);
+                        cerr << "DOT: " << dotToType << endl;
+                    }
+                } else if(!strncmp("verbose",optarg,7)) {
+                    if(strlen(optarg)>8 && optarg[7]=='=') {
+                        verbosity = atoi(optarg+8);
+                    } else if(strlen(optarg)==7) {
+                        ++verbosity;
+                    }
+                } else if(!strcmp("no-color",optarg)) {
+                    useColoredMessages = false;
+                } else if(!strcmp("no-nd-warning",optarg)) {
+                    warnNonDeterminism = false;
+                } else if(!strcmp("min",optarg)) {
+                    imcaMinMaxSet = true;
+                    imcaMinMax = "-min";
+                    mrmcMinMax = "{>1}";
+                } else if(!strcmp("max",optarg)) {
+                    imcaMinMaxSet = true;
+                    imcaMinMax = "-max";
+                    mrmcMinMax = "{<0}";
+                }
+                if(!strcmp("mrmc",optarg)) {
+                    calcImca=false;
+                }else if(!strcmp("imca",optarg)) {
+                    calcImca=true;
+                }
 		}
 	}
 
@@ -1036,6 +1096,18 @@ int main(int argc, char** argv) {
 		}
 		std::cout << out.str();
 	}
+    
+    for(File dft: dfts) {
+    File svlLogFile = File(outputFolderFile.getFileRealPath(),dft.getFileBase(),"log");
+    Shell::SvlStatistics svlStats;
+    if(Shell::readSvlStatisticsFromLog(svlLogFile,svlStats)) {
+        messageFormatter->reportWarning("Could not read from svl log file `" + svlLogFile.getFileRealPath() + "'");
+    } else {
+        messageFormatter->reportAction2("Read from svl log file `" + svlLogFile.getFileRealPath() + "'",VERBOSITY_DATA);
+        messageFormatter->notify("SVL composition maximum values");
+        std::cout << "Max States: " << svlStats.max_states << ", Max Transitions: " << svlStats.max_transitions << ", Max Memory by SVL: " << svlStats.max_memory << " Kbytes" << endl;
+    }
+    }
 	
 	/* Write yaml file */
 	if(yamlFileSet) {

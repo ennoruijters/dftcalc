@@ -1,4 +1,4 @@
-module TEMPLATE_PAND(TEMPLATE_COMMON) is
+module TEMPLATE_PAND_ACTIVE(TEMPLATE_COMMON) is
 
 	process PAND [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL] (total : NAT, failed : NAT_ARRAY) is
 	var
@@ -46,28 +46,6 @@ module TEMPLATE_PAND(TEMPLATE_COMMON) is
 					FAIL (!0 of NAT); done := TRUE
 				end if
 
-			(*
-			 * If this node is activated, enable the activation of the source.
-			 *)
-			[]
-				ACTIVATE (?nr,FALSE) where (nr == (0 of NAT));
-				if (nr_act == 0 of NAT) then
-					nr_act := 1 of NAT
-				end if
-
-			(*
-			 * If the children should be activated, do so, one by one,
-			 * from left to right.
-			 *)
-			[]
-				if (nr_act > 0) then
-					ACTIVATE (!nr_act,TRUE);
-					if nr_act < total  then
-						nr_act := nr_act + 1
-					else
-						nr_act := 0
-					end if
-				end if
 			end select
 		end loop
 	end var

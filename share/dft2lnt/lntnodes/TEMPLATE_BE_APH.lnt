@@ -1,6 +1,6 @@
-module TEMPLATE_BE(TEMPLATE_COMMON) is
+module TEMPLATE_BE_APH(TEMPLATE_COMMON) is
 
-	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS) is
+	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT, cold: BOOL, initial: STATUS, phases: NAT) is
 	var
 		status : STATUS,
 		nr : NAT
@@ -30,7 +30,10 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 
 				if ((not (cold)) and (status == DORMANT)) then
 					RATE_FAIL (!1 of NAT,1 of NAT);
-					status := FAILING
+					phases := phases-1;
+					if (phases < 1) then
+						status := FAILING
+					end if
 				end if
 
 			(*
@@ -42,7 +45,10 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 			[]
 				if (status == ACTIVE) then
 					RATE_FAIL (!1 of NAT,2 of NAT);
-					status := FAILING
+					phases := phases-1;
+					if (phases < 1) then
+						status := FAILING
+					end if
 				end if
 
 			(*

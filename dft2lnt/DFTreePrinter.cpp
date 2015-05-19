@@ -4,7 +4,7 @@
  * Part of dft2lnt library - a library containing read/write operations for DFT
  * files in Galileo format and translating DFT specifications into Lotos NT.
  * 
- * @author Freark van der Berg
+ * @author Freark van der Berg and extended by Dennis Guck
  */
 
 #include "DFTreePrinter.h"
@@ -46,6 +46,21 @@ int DFT::DFTreePrinter::printBasicEvent(std::ostream& out, const DFT::Nodes::Bas
 	out << " dorm=" << basicEvent->getDorm();
     if(basicEvent->getProb() > 0)
         out << " prob=" << basicEvent->getProb();
+    if(basicEvent->getPhases()>0){
+        out << " phases=" << basicEvent->getPhases();
+    }
+    if(basicEvent->getInterval()>0){
+        out << " interval=" << basicEvent->getInterval();
+    }
+    if(basicEvent->getMaintain()>0){
+        out << " maintain=" << basicEvent->getMaintain();
+    }
+    if(basicEvent->isRepairable()){
+        if(basicEvent->getRepair()>0)
+        {
+            out << " repair=" << basicEvent->getRepair();
+        }
+    }
 	out.precision(ss_old);
 	out << ";";
 	return 0;
@@ -58,7 +73,12 @@ int DFT::DFTreePrinter::printGate(std::ostream& out, const DFT::Nodes::Gate* gat
 	if(DFT::Nodes::Node::typeMatch(gate->getType(),DFT::Nodes::GateFDEPType)) {
 		const DFT::Nodes::GateFDEP* fdep = static_cast<const DFT::Nodes::GateFDEP*>(gate);
 		printGateFDEP(out,fdep);
-	} else {
+    }
+    else {
+        if (DFT::Nodes::Node::typeMatch(gate->getType(),DFT::Nodes::InspectionType)){
+            const DFT::Nodes::Inspection* insp = static_cast<const DFT::Nodes::Inspection*>(gate);
+            out << insp->getLambda();
+        }
 		for(DFT::Nodes::Node* node: gate->getChildren()) {
 			out << " \"" << node->getName() << "\"";
 		}

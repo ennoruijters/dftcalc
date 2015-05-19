@@ -4,7 +4,7 @@
  * Part of dft2lnt library - a library containing read/write operations for DFT
  * files in Galileo format and translating DFT specifications into Lotos NT.
  * 
- * @author Freark van der Berg
+ * @author Freark van der Berg and extended by Dennis Guck
  */
 
 #ifndef ASTDFTBUILDER_H
@@ -66,6 +66,9 @@ public:
 		case DFT::Nodes::GateSEQOrType:
 			gate = new DFT::Nodes::GateSEQOr(astgate->getLocation(), astgate->getName()->getString());
 			break;
+        case DFT::Nodes::GateSAndType:
+            gate = new DFT::Nodes::GateSAnd(astgate->getLocation(), astgate->getName()->getString());
+            break;
 		case DFT::Nodes::GateHSPType:
 		case DFT::Nodes::GateWSPType:
 		case DFT::Nodes::GateCSPType:
@@ -74,6 +77,9 @@ public:
 		case DFT::Nodes::GatePAndType:
 			gate = new DFT::Nodes::GatePAnd(astgate->getLocation(), astgate->getName()->getString());
 			break;
+        case DFT::Nodes::GatePorType:
+            gate = new DFT::Nodes::GatePor(astgate->getLocation(), astgate->getName()->getString());
+            break;
 		case DFT::Nodes::GateSeqType:
 			break;
 		case DFT::Nodes::GateVotingType: {
@@ -84,6 +90,28 @@ public:
 		case DFT::Nodes::GateFDEPType:
 			gate = new DFT::Nodes::GateFDEP(astgate->getLocation(), astgate->getName()->getString());
 			break;
+		case DFT::Nodes::RepairUnitType:
+			gate = new DFT::Nodes::RepairUnit(astgate->getLocation(), astgate->getName()->getString());
+			break;
+		case DFT::Nodes::RepairUnitFcfsType:
+			gate = new DFT::Nodes::RepairUnit(astgate->getLocation(), astgate->getName()->getString(), DFT::Nodes::RepairUnitFcfsType);
+			break;
+		case DFT::Nodes::RepairUnitPrioType:
+			gate = new DFT::Nodes::RepairUnit(astgate->getLocation(), astgate->getName()->getString(), DFT::Nodes::RepairUnitPrioType);
+			break;
+		case DFT::Nodes::RepairUnitNdType:
+			gate = new DFT::Nodes::RepairUnit(astgate->getLocation(), astgate->getName()->getString(), DFT::Nodes::RepairUnitNdType);
+			break;
+        case DFT::Nodes::InspectionType:{
+            DFT::AST::ASTInspectionType* insp = static_cast<DFT::AST::ASTInspectionType*>(astgate->getGateType());
+            gate = new DFT::Nodes::Inspection(astgate->getLocation(), astgate->getName()->getString(),insp->getPhases(),insp->getLambda());
+            break;
+        }
+        case DFT::Nodes::ReplacementType:{
+            DFT::AST::ASTReplacementType* rep = static_cast<DFT::AST::ASTReplacementType*>(astgate->getGateType());
+            gate = new DFT::Nodes::Replacement(astgate->getLocation(), astgate->getName()->getString(),rep->getPhases(),rep->getLambda());
+            break;
+        }
 		case DFT::Nodes::GateTransferType:
 			break;
 		default:
@@ -169,15 +197,69 @@ public:
 		}
 
 		// Find probability
+        {
+            std::vector<DFT::AST::ASTAttribute*>::iterator it = basicEvent->getAttributes()->begin();
+            for(; it!=basicEvent->getAttributes()->end(); ++it) {
+                if((*it)->getLabel()==DFT::Nodes::BE::AttrLabelProb) {
+                    float v = (*it)->getValue()->getFloatValue();
+                    be->setProb(v);
+                }
+            }
+        }
+        
+        // Find maintain
+        {
+            std::vector<DFT::AST::ASTAttribute*>::iterator it = basicEvent->getAttributes()->begin();
+            for(; it!=basicEvent->getAttributes()->end(); ++it) {
+                if((*it)->getLabel()==DFT::Nodes::BE::AttrLabelMaintain) {
+                    double v = (*it)->getValue()->getFloatValue();
+                    be->setMaintain(v);
+                }
+            }
+        }
+		
+		// Find repair
 		{
 			std::vector<DFT::AST::ASTAttribute*>::iterator it = basicEvent->getAttributes()->begin();
 			for(; it!=basicEvent->getAttributes()->end(); ++it) {
-				if((*it)->getLabel()==DFT::Nodes::BE::AttrLabelProb) {
+				if((*it)->getLabel()==DFT::Nodes::BE::AttrLabelRepair) {
 					float v = (*it)->getValue()->getFloatValue();
-					be->setProb(v);
+					be->setRepair(v);
+					be->setRepairable(true);
 				}
 			}
 		}
+        // Find phases
+        {
+            std::vector<DFT::AST::ASTAttribute*>::iterator it = basicEvent->getAttributes()->begin();
+            for(; it!=basicEvent->getAttributes()->end(); ++it) {
+                if((*it)->getLabel()==DFT::Nodes::BE::AttrLabelPhases) {
+                    double v = (*it)->getValue()->getNumberValue();
+                    be->setPhases(v);
+                }
+            }
+        }
+        // Find interval
+        {
+            std::vector<DFT::AST::ASTAttribute*>::iterator it = basicEvent->getAttributes()->begin();
+            for(; it!=basicEvent->getAttributes()->end(); ++it) {
+                if((*it)->getLabel()==DFT::Nodes::BE::AttrLabelInterval) {
+                    double v = (*it)->getValue()->getNumberValue();
+                    be->setInterval(v);
+					be->setRepairable(true);
+                }
+            }
+        }
+		// Find priority
+        {
+            std::vector<DFT::AST::ASTAttribute*>::iterator it = basicEvent->getAttributes()->begin();
+            for(; it!=basicEvent->getAttributes()->end(); ++it) {
+                if((*it)->getLabel()==DFT::Nodes::BE::AttrLabelPrio) {
+                    int v = (*it)->getValue()->getNumberValue();
+                    be->setPriority(v);
+                }
+            }
+        }
 		
 		// Find embedded distribution
 		{
