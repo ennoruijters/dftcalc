@@ -9,7 +9,7 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 		nr := 0;
 		loop
 			select
-
+			
 			(*
 			 * When this BE is activated, it will set the status to ACTIVE,
 			 * but only if it was DORMANT (not active and not failed)
@@ -19,7 +19,7 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 					status := ACTIVE
 				end if;
 				nr := 0
-
+			
 			(*
 			 * When this BE is in the DORMANT state, it can fail with the
 			 * failure rate associated with this state. The rate is later
@@ -32,7 +32,7 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 					RATE_FAIL (!1 of NAT,1 of NAT);
 					status := FAILING
 				end if
-
+			
 			(*
 			 * When this BE is in the ACTIVE state, it can fail with the
 			 * failure rate associated with this state. The rate is later
@@ -44,7 +44,7 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 					RATE_FAIL (!1 of NAT,2 of NAT);
 					status := FAILING
 				end if
-
+			
 			(*
 			 * When this BE is in the FAILING state (caused by one of the
 			 * failure rates), signal this to the system using FAIL !0.
@@ -60,4 +60,5 @@ module TEMPLATE_BE(TEMPLATE_COMMON) is
 	end var
 	end process
 
-end module
+end module 
+

@@ -1,49 +1,24 @@
 module TEMPLATE_BE_COLD(TEMPLATE_COMMON) is
 
-	process BEproc [FAIL : NAT_CHANNEL, SUCC : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT) is
+	process BEproc [FAIL : NAT_CHANNEL, ACTIVATE : NAT_BOOL_CHANNEL, RATE_FAIL : NAT_NAT_CHANNEL] (total: NAT) is
 	var
 		status : STATUS,
-		nr : NAT,
-		done : BOOL,
-		failed : BOOL,
-		success : BOOL
+		nr : NAT
 	in
-		status := initial;
+		status := DORMANT;
 		nr := 0;
-		success := FALSE;
-		failed := FALSE;
-		done := FALSE;
 		loop
 			select
-			
+
 			(*
 			 * When this BE is activated, it will set the status to ACTIVE,
 			 * but only if it was DORMANT (not active and not failed)
 			 *)
-				ACTIVATE (?nr,FALSE) where (nr==0 of NAT);
+				ACTIVATE (?nr of NAT,FALSE) where (nr == 0 of NAT);
 				if (status == DORMANT) then
 					status := ACTIVE
 				end if;
 				nr := 0
-			
-			(*
-			 * When this BE is in the DORMANT state, it can fail with the
-			 * failure rate associated with this state. The rate is later
-			 * introduced using renaming of RATE_FAIL !1 !1.
-			 * If the failure event is trigger, go into the FAILING state.
-			 *)
-			[]
-				if ((not (cold)) and (status == DORMANT) and (not (success)) and (not (failed))) then
-					RATE_FAIL (!1 of NAT,2 of NAT);
-					failed := TRUE
-				end if
-			[]
-				if ((not (cold)) and (status == DORMANT) and (not (success)) and (not (failed))) then
-					RATE_FAIL (!1 of NAT,3 of NAT);
-					success := TRUE
-				end if
-
-			
 
 			(*
 			 * When this BE is in the ACTIVE state, it can fail with the
@@ -52,38 +27,20 @@ module TEMPLATE_BE_COLD(TEMPLATE_COMMON) is
 			 * If the failure event is trigger, go into the FAILING state.
 			 *)
 			[]
-				if ((status == ACTIVE) and (not (success)) and (not (failed))) then
+				if (status == ACTIVE) then
 					RATE_FAIL (!1 of NAT,2 of NAT);
-					failed := TRUE
+					status := FAILING
 				end if
 
-			[]
-				if (status == ACTIVE) and (not (success)) and (not (failed)) then
-					RATE_FAIL (!1 of NAT,3 of NAT);
-					success := TRUE
-				end if
-			
 			(*
 			 * When this BE is in the FAILING state (caused by one of the
 			 * failure rates), signal this to the system using FAIL !0.
 			 * After this, go into the FAILED state.
 			 *)
 			[]
-				if ((failed) and (not (done)) and (not (success))) then
+				if (status == FAILING) then
 					FAIL (!0 of NAT);
 					status := FAILED
-				end if
-
-			(*
-			 * When this BE succeeded (caused by the
-			 * success rate), signal this to the system using SUCC !0.
-			 * After this, go into the SUCC state.
-			 *)
-
-			[]
-				if ((success) and (not (failed)) and (not (done))) then
-					SUCC (!0 of NAT);
-					done := TRUE
 				end if
 			end select
 		end loop
