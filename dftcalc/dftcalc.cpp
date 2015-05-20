@@ -59,6 +59,7 @@ void print_help(MessageFormatter* messageFormatter, string topic="") {
         messageFormatter->message("  -R              Reuse existing output files.");
         messageFormatter->message("  --mrmc          Use MRMC. (standard setting)");
         messageFormatter->message("  --imca          Use IMCA instead of MRMC.");
+        messageFormatter->message("  --at            Interpret input as Attack Tree.");
         messageFormatter->message("  --no-nd-warning Do not warn (but give notice) for non-determinism.");
         messageFormatter->message("");
         messageFormatter->notify ("Debug Options:");
@@ -329,7 +330,7 @@ bool hasHiddenLabels(const File& file) {
     return res;
 }
 
-int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const File& dftOriginal, const std::vector<std::pair<std::string,std::string>>& calcCommands, unordered_map<string,string> settings, bool calcImca, bool warnNonDeterminism) {
+int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const File& dftOriginal, const std::vector<std::pair<std::string,std::string>>& calcCommands, unordered_map<string,string> settings, bool calcImca, bool warnNonDeterminism, bool attackTree) {
 	File dft    = dftOriginal.newWithPathTo(cwd);
 	File svl    = dft.newWithExtension("svl");
 	File svlLog = dft.newWithExtension("log");
@@ -406,6 +407,8 @@ int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const F
         }
 		if (!messageFormatter->usingColoredMessages())
 			ss << " --no-color";
+        if (attackTree)
+            ss << " --at";
         ss << " \""    + dft.getFileRealPath() + "\"";
 		sysOps.command = ss.str();
 		result = Shell::system(sysOps);
@@ -712,6 +715,7 @@ int main(int argc, char** argv) {
     string imcaMinMax        = "-min";
     string mrmcMinMax        = "{>1}";
     int imcaMinMaxSet        = 0;
+    bool attackTree          = false;
 	
 	std::vector<std::string> failedBEs;
 	
@@ -877,6 +881,8 @@ int main(int argc, char** argv) {
                     calcImca=false;
                 }else if(!strcmp("imca",optarg)) {
                     calcImca=true;
+                }else if(!strcmp("at",optarg)) {
+                    attackTree=true;
                 }
 		}
 	}
@@ -1057,7 +1063,7 @@ int main(int argc, char** argv) {
 	for(File dft: dfts) {
 		hasInput = true;
 		if(FileSystem::exists(dft)) {
-			bool res = calc.calculateDFT(reuse, outputFolderFile.getFileRealPath(),dft,(calcImca?imcaCommands:mrmcCommands),settings,calcImca, warnNonDeterminism);
+			bool res = calc.calculateDFT(reuse, outputFolderFile.getFileRealPath(),dft,(calcImca?imcaCommands:mrmcCommands),settings,calcImca, warnNonDeterminism, attackTree);
 			hasErrors = hasErrors || res;
 		} else {
 			messageFormatter->reportError("DFT File `" + dft.getFileRealPath() + "' does not exist");

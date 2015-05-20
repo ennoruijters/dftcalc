@@ -54,6 +54,7 @@ void print_help(MessageFormatter* messageFormatter, string topic="") {
 		messageFormatter->message("  --color         Use colored messages.");
 		messageFormatter->message("  --no-color      Do not use colored messages.");
 		messageFormatter->message("  --version       Print version info and quit.");
+        messageFormatter->message("  --at            Interpret input as Attack Tree.");
 		messageFormatter->message("");
 		messageFormatter->notify ("Debug Options:");
 		messageFormatter->message("  -a FILE         Output AST to file. '-' for stdout.");
@@ -187,6 +188,7 @@ int main(int argc, char** argv) {
 	int verbosity            = 0;
 	int printHelp            = 0;
 	int printVersion         = 0;
+    bool attackTree          = false;
 	
 	std::vector<std::string> failedBEs;
 	
@@ -315,7 +317,9 @@ int main(int argc, char** argv) {
 					useColoredMessages = false;
 				} else if(!strcmp("warn-code",optarg)) {
 					settings["warn-code"] = "1";
-				}
+                } else if(!strcmp("at",optarg)) {
+                    attackTree = true;
+                }
 		}
 	}
 
@@ -562,14 +566,25 @@ int main(int argc, char** argv) {
 		}
 	}
     
+    /* Set attackTreeValue and add knowledge to gates and BEs*/
+    if(dft && attackTree) {
+        dft->setAttackTree();
+        compilerContext->reportAction("DFT is set to Attack Tree",VERBOSITY_FLOW);
+        
+        compilerContext->reportAction("Applying Attack Tree knowledge to DFT...",VERBOSITY_FLOW);
+        compilerContext->flush();
+        dft->applyAttackTreeKnowledge();
+         compilerContext->reportAction("Finished with Attack Tree knowledge to DFT...",VERBOSITY_FLOW);
+    }
+    
 	/* Add repair knowledge to gates */
-	if(dft) {
+	if(dft && !attackTree) {
 		compilerContext->reportAction("Applying repair knowledge to DFT gates...",VERBOSITY_FLOW);
 		compilerContext->flush();
 		dft->addRepairInfo();
 	}
 	/* Add smart semantics to the dft */
-	if(dft){
+	if(dft && !attackTree){
 		compilerContext->reportAction("Applying smart semantics to DFT...",VERBOSITY_FLOW);
 		compilerContext->flush();
 		dft->applySmartSemantics();
