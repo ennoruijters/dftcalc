@@ -240,6 +240,32 @@ namespace DFT {
 				}
 			}
 			
+            /* Find bcg_info executable (based on PATH environment variable) */
+            {
+                bool exists = false;
+                bool accessible = false;
+                vector<File> bcginfos;
+                int n = FileSystem::findInPath(bcginfos,File("bcg_info"));
+                for(File bcginfo: bcginfos) {
+                    accessible = false;
+                    exists = true;
+                    if(FileSystem::hasAccessTo(bcginfo,X_OK)) {
+                        accessible = true;
+                        bcginfoExec = bcginfo;
+                        break;
+                    } else {
+                        messageFormatter->reportWarning("bcg_info [" + bcginfo.getFilePath() + "] is not runnable",VERBOSITY_SEARCHING);
+                        ok = false;
+                    }
+                }
+                if(!accessible) {
+                    messageFormatter->reportError("no runnable bcg_info executable found in PATH");
+                    ok = false;
+                } else {
+                    messageFormatter->reportAction("Using bcg_info [" + bcginfoExec.getFilePath() + "]",VERBOSITY_SEARCHING);
+                }
+            }
+            
 			/* Find dot executable (based on PATH environment variable) */
 			{
 				bool exists = false;

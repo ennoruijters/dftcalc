@@ -393,8 +393,8 @@ int DFT::DFTCalc::calculateDFT(const bool reuse, const std::string& cwd, const F
 		   << " -s \"" + svl.getFileRealPath() + "\""
 		   << " -x \"" + exp.getFileRealPath() + "\""
 		   << " -b \"" + bcg.getFileRealPath() + "\""
-		   << " -n \"" + dftOriginal.getFileRealPath() + "\""
-		   << " \""    + dft.getFileRealPath() + "\"";
+		   << " -n \"" + dftOriginal.getFileRealPath() + "\"";
+		   //<< " \""    + dft.getFileRealPath() + "\"";
 		   //<< " --warn-code";
         if(!evidence.empty())
         {
