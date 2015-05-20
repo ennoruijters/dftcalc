@@ -41,6 +41,9 @@ private:
 
 	/// The Top (root) Node of the DFT
 	Nodes::Node* topNode;
+    
+    /// Attack Tree identifier
+    bool attackTree;
 
 	/**
 	 * Sets the Top node without any checks
@@ -58,7 +61,7 @@ private:
 	}
 
 public:
-	DFTree(): nodes(0), topNode(NULL) {
+	DFTree(): nodes(0), topNode(NULL), attackTree(false) {
 
 	}
 	virtual ~DFTree() {
@@ -76,6 +79,20 @@ public:
 	void addNode(Nodes::Node* node) {
 		nodes.push_back(node);
 	}
+    
+    /**
+     * Adds Attack Tree info.
+     */
+    void setAttackTree() {
+        attackTree = true;
+    }
+    
+    /**
+     * Gives info if it is an Attack Tree
+     */
+    bool isAttackTree() {
+        return attackTree;
+    }
 
 	/**
 	 * Removed the specified node from this DFT.
@@ -270,6 +287,37 @@ public:
 		}
 	}
 
+   /**
+     * Applies Attack Tree info to all nodes
+     * @param Gate to start
+     */
+    void applyAttackTreeKnowledge(DFT::Nodes::Node* node) {
+          if(node->isBasicEvent()) {
+              //const DFT::Nodes::BasicEvent* be = static_cast<const DFT::Nodes::BasicEvent*>(node); <-- This will induce a deadlock
+              node->setAttackTree(true);
+          }else if(node->isGate()) {
+              DFT::Nodes::Gate* gate = static_cast<DFT::Nodes::Gate*>(node);
+              gate->setAttackTree(true);
+              for(size_t n = 0; n<gate->getChildren().size(); ++n) {
+                  applyAttackTreeKnowledge(gate->getChildren().at(n));
+              }
+          }
+    }
+        
+        
+    /*
+     * Applies Attack Tree info to the topnode of the dft, and calls
+     * applyAttackTreeKnowledge(node) for all his children
+     */
+    void applyAttackTreeKnowledge() {
+        DFT::Nodes::Node* node=getTopNode();
+        if(node->isGate()){
+            DFT::Nodes::Gate* gate = static_cast<DFT::Nodes::Gate*>(node);
+            gate->setAttackTree(true);
+            applyAttackTreeKnowledge(gate);
+        }
+    }
+    
 	/*
 	 * Applies smart semantics to the topnode of the dft, and calls
 	 * applySmartSemantics(node) for all his children

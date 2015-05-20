@@ -396,33 +396,32 @@ public:
 		this->failed = failed;
 	}
 
-  /**
-   * Marks this Basic Event as not active. This means smart semantics cannot be
-   * applied to this Basic Event
-   */
-
-  void setNotActive(){
-    active=false;
-    initialized = true;
-  }
-  /**
-   * Determines whether or not smart semantics are applicabel for the Basic Event
-   */
-  void setActive(){
-    if(!initialized){
-      active=!repairable;
-      std::vector<Nodes::Node*> parents = this->getParents();
-      for(size_t n=0; n < parents.size() && active; ++n){
-        if(parents.at(n)->isGate()){
-          DFT::Nodes::Gate* gate = static_cast<DFT::Nodes::Gate*> (parents.at(n));
-          gate->setActive();
-          active=gate->isActive();
-        }
-
-      }
-      initialized=true;
+    /**
+     * Marks this Basic Event as not active. This means smart semantics cannot be
+     * applied to this Basic Event
+     */
+    void setNotActive(){
+      active=false;
+      initialized = true;
     }
-  }
+    /**
+     * Determines whether or not smart semantics are applicabel for the Basic Event
+     */
+    void setActive(){
+      if(!initialized){
+        active=!repairable;
+        std::vector<Nodes::Node*> parents = this->getParents();
+        for(size_t n=0; n < parents.size() && active; ++n){
+          if(parents.at(n)->isGate()){
+            DFT::Nodes::Gate* gate = static_cast<DFT::Nodes::Gate*> (parents.at(n));
+            gate->setActive();
+            active=gate->isActive();
+          }
+
+        }
+        initialized=true;
+      }
+    }
 
 	/**
 	 * Returns whether or not this Basic Event is marked as being failed.

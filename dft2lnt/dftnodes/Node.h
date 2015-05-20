@@ -154,6 +154,7 @@ private:
 	string name;
 	NodeType type;
     bool repairable;
+    bool attackTree;
 	
 	/// List of parents, instances are freed by DFTree instance.
 	std::vector<Nodes::Node*> parents;
@@ -161,19 +162,22 @@ public:
     Node(Location location, NodeType type):
         location(location),
         type(type),
-        repairable(false){
+        repairable(false),
+        attackTree(false){
     }
     Node(Location location, std::string name, NodeType type):
         location(location),
         name(name),
         type(type),
-        repairable(false){
+        repairable(false),
+        attackTree(false){
     }
-    Node(Location location, std::string name, NodeType type, bool repairable):
+    Node(Location location, std::string name, NodeType type, bool repairable, bool at):
         location(location),
         name(name),
         type(type),
-        repairable(repairable){
+        repairable(repairable),
+        attackTree(at){
     }
     Node() {
     }
@@ -226,8 +230,17 @@ public:
 	 */
 	virtual const std::string& getTypeStr() const { return getTypeName(getType()); }
     
+    /**
+     * Sets Nodes to repairable
+     */
     void setRepairable(bool repair) { repairable=repair; }
     const void setRepairable(bool repair) const { setRepairable(repairable); }
+    
+    /**
+     * Sets Nodes to Attack Tree
+     */
+    void setAttackTree(bool at) { attackTree=at; }
+    const void setAttackTree(bool at) const { setAttackTree(at); }
 	
     /**
      * returns if gate is repairable
@@ -236,6 +249,15 @@ public:
     virtual bool isRepairable() const {
         return repairable;
     }
+    
+    /**
+     * returns if gate is AttackTree
+     * @return True if AT, otherwise false
+     */
+    virtual bool isAttackTree() const {
+        return attackTree;
+    }
+
     
 	/**
 	 * Returns whether this Node is a BasicEvent, i.e. typeMatch(type,BasicEventType).
