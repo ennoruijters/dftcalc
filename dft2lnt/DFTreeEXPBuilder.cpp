@@ -236,41 +236,44 @@ int DFT::DFTreeEXPBuilder::build() {
         // reset rules
         vector<DFT::EXPSyncRule*> resetRules;
 		
-        // TODO: make cases to choose which parse and build is needed!!
         
-        /******
-         * ATs
-         ******/
-        /*
-        parseDFT(activationRules,failRules,successRules);
-        buildEXPHeader(activationRules,failRules,successRules);
-        buildEXPBody(activationRules,failRules,successRules);
-        */
+        if(dft->isAttackTree()){
         
-        /****************
-         * Standard DFTs
-         ****************/
-        /*
-		parseDFT(activationRules,failRules);
-		buildEXPHeader(activationRules,failRules);
-		buildEXPBody(activationRules,failRules);
-        */
-		
-        /********************
-         * DFTs with repairs
-         ********************/
-        /*
-        parseDFT(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules);
-		buildEXPHeader(activationRules,failRules,repairRules,repairedRules,onlineRules);
-		buildEXPBody(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules);
-        */
+            /******
+             * ATs
+             ******/
+            parseDFT(activationRules,failRules,successRules);
+            buildEXPHeader(activationRules,failRules,successRules);
+            buildEXPBody(activationRules,failRules,successRules);
+            
+        } else {
         
-        /************************************
-         * DFTs with repairs and inspections
-         ************************************/
-        parseDFT(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules,inspectionRules,inspectedRules,resetRules);
-        buildEXPHeader(activationRules,failRules,repairRules,repairedRules,onlineRules,inspectionRules,inspectedRules,resetRules);
-        buildEXPBody(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules,inspectionRules,inspectedRules,resetRules);
+            /****************
+             * Standard DFTs
+             ****************/
+            /*
+            parseDFT(activationRules,failRules);
+            buildEXPHeader(activationRules,failRules);
+            buildEXPBody(activationRules,failRules);
+            */
+            
+            /********************
+             * DFTs with repairs
+             ********************/
+            /*
+            parseDFT(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules);
+            buildEXPHeader(activationRules,failRules,repairRules,repairedRules,onlineRules);
+            buildEXPBody(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules);
+            */
+            
+            /************************************
+             * DFTs with repairs and inspections
+             ************************************/
+            parseDFT(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules,inspectionRules,inspectedRules,resetRules);
+            buildEXPHeader(activationRules,failRules,repairRules,repairedRules,onlineRules,inspectionRules,inspectedRules,resetRules);
+            buildEXPBody(activationRules,failRules,repairRules,repairedRules,repairingRules,onlineRules,inspectionRules,inspectedRules,resetRules);
+            
+        }
 		
 		// Build SVL file
 		svl_body << "% BCG_MIN_OPTIONS=\"-self\";" << svl_body.applypostfix;
