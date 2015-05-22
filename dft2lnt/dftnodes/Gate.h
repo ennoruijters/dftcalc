@@ -59,7 +59,7 @@ public:
 	 */
 	void setRepairableChildren(int nr) { repairableChildren=nr; }
 
-    Gate(Location loc, std::string name, DFT::Nodes::NodeType nodeType): Node(loc,name,nodeType), initialized(false) {
+    Gate(Location loc, std::string name, DFT::Nodes::NodeType nodeType): Node(loc,name,nodeType), active(false), initialized(false) {
     }
 
 	virtual ~Gate() {

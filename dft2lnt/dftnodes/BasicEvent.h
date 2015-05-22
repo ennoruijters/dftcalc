@@ -381,6 +381,7 @@ public:
         phases(1),
 		shape(-1),
     failed(false),
+    active(false),
     initialized(false) {
 	}
 	virtual ~BasicEvent() {
