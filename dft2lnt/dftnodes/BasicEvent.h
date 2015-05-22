@@ -409,7 +409,7 @@ public:
      */
     void setActive(){
       if(!initialized){
-        active=!repairable;
+        active=!repairable && (phases==1);
         std::vector<Nodes::Node*> parents = this->getParents();
         for(size_t n=0; n < parents.size() && active; ++n){
           if(parents.at(n)->isGate()){
