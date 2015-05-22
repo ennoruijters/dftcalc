@@ -584,11 +584,13 @@ int main(int argc, char** argv) {
 		dft->addRepairInfo();
 	}
 	/* Add smart semantics to the dft */
-	if(dft && !attackTree){
+	/*
+    if(dft && !attackTree){
 		compilerContext->reportAction("Applying smart semantics to DFT...",VERBOSITY_FLOW);
 		compilerContext->flush();
 		dft->applySmartSemantics();
     	}
+     */
     /* Remove superflous FDEP edges */
     if(dft) {
         compilerContext->reportAction("Applying FDEP cleanup to DFT gates...",VERBOSITY_FLOW);
