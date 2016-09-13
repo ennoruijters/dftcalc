@@ -281,11 +281,9 @@ public:
 		} else if(node->isGate()){
 			DFT::Nodes::Gate* gate = static_cast<DFT::Nodes::Gate*>(node);
 			gate->setActive();
-			for(size_t n=0; n <gate->getChildren().size(); ++n){
-				applySmartSemantics(gate->getChildren().at(n));
-			}
 			if(gate->isSpare()){
-				for(size_t n=1; n <gate->getChildren().size(); ++n){
+				for(size_t n=1; n < gate->getChildren().size(); ++n){
+                    /*
 					if(gate->getChildren().at(n)->isBasicEvent()){
 						DFT::Nodes::BasicEvent* be = static_cast<DFT::Nodes::BasicEvent*>(gate->getChildren().at(n));
 						be->setNotActive();
@@ -293,8 +291,15 @@ public:
 						DFT::Nodes::Gate* g = static_cast<DFT::Nodes::Gate*>(gate->getChildren().at(n));
 						g->setNotActive();
 					}
+                     */
+                    applySmartSemanticsSpare(gate->getChildren().at(n));
 				}
-			}
+			}else
+            {
+                for(size_t n=0; n <gate->getChildren().size(); ++n){
+                    applySmartSemantics(gate->getChildren().at(n));
+                }
+            }
 		}
 	}
 	
@@ -308,22 +313,47 @@ public:
 		} else if(node->isGate()){
 			DFT::Nodes::Gate* gate = static_cast<DFT::Nodes::Gate*>(node);
 			gate->setActive();
-			for(size_t n; n <gate->getChildren().size(); ++n){
-				applySmartSemantics(gate->getChildren().at(n));
-			}
+			//for(size_t n; n <gate->getChildren().size(); ++n){
+			//	applySmartSemantics(gate->getChildren().at(n));
+			//}
 			if(gate->isSpare()){
 				for(size_t n=1; n <gate->getChildren().size(); ++n){
-					if(gate->getChildren().at(n)->isBasicEvent()){
-						DFT::Nodes::BasicEvent* be = static_cast<DFT::Nodes::BasicEvent*>(gate->getChildren().at(n));
-						be->setNotActive();
-					} else if(gate->getChildren().at(n)->isGate()){
-						DFT::Nodes::Gate* g = static_cast<DFT::Nodes::Gate*>(gate->getChildren().at(n));
-						g->setNotActive();
-					}
+					//if(gate->getChildren().at(n)->isBasicEvent()){
+					//	DFT::Nodes::BasicEvent* be = static_cast<DFT::Nodes::BasicEvent*>(gate->getChildren().at(n));
+					//	be->setNotActive();
+					//} else if(gate->getChildren().at(n)->isGate()){
+					//	DFT::Nodes::Gate* g = static_cast<DFT::Nodes::Gate*>(gate->getChildren().at(n));
+					//	g->setNotActive();
+                    applySmartSemanticsSpare(gate->getChildren().at(n));
+					//}
 				}
-			}
+			}else
+            {
+                for(size_t n; n <gate->getChildren().size(); ++n){
+                    applySmartSemantics(gate->getChildren().at(n));
+                }
+            }
 		}
 	}
+    
+    
+    /**
+     * Applies recursively smart semantics to spare modules
+     */
+    void applySmartSemanticsSpare(DFT::Nodes::Node* node){
+        if(node->isBasicEvent()){
+            DFT::Nodes::BasicEvent* be = static_cast<DFT::Nodes::BasicEvent*>(node);
+            be->setNotActive();
+        }
+        else if(node->isGate()){
+            DFT::Nodes::Gate* gate = static_cast<DFT::Nodes::Gate*>(node);
+            gate->setNotActive();
+            for(size_t n; n <gate->getChildren().size(); ++n){
+                applySmartSemanticsSpare(gate->getChildren().at(n));
+            }
+        }
+    }
+    
 
 	/**
 	 * Apply repair information to a gates
