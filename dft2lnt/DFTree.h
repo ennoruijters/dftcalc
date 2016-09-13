@@ -292,7 +292,13 @@ public:
 						g->setNotActive();
 					}
                      */
-                    applySmartSemanticsSpare(gate->getChildren().at(n));
+                    if(gate->getChildren().at(n)->isBasicEvent()){
+                        DFT::Nodes::BasicEvent* be = static_cast<DFT::Nodes::BasicEvent*>(gate->getChildren().at(n));
+                        be->setNotActive();
+                    }
+                    else if(gate->getChildren().at(n)->isGate()){
+                        applySmartSemanticsSpare(gate->getChildren().at(n));
+                    }
 				}
 			}else
             {
@@ -324,7 +330,13 @@ public:
 					//} else if(gate->getChildren().at(n)->isGate()){
 					//	DFT::Nodes::Gate* g = static_cast<DFT::Nodes::Gate*>(gate->getChildren().at(n));
 					//	g->setNotActive();
-                    applySmartSemanticsSpare(gate->getChildren().at(n));
+                    if(gate->getChildren().at(n)->isBasicEvent()){
+                        DFT::Nodes::BasicEvent* be = static_cast<DFT::Nodes::BasicEvent*>(gate->getChildren().at(n));
+                        be->setNotActive();
+                    }
+                    else if(gate->getChildren().at(n)->isGate()){
+                        applySmartSemanticsSpare(gate->getChildren().at(n));
+                    }
 					//}
 				}
 			}else
