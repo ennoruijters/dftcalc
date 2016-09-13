@@ -28,7 +28,7 @@ module TEMPLATE_PAND_ACTIVE(TEMPLATE_COMMON) is
 			 *   - Repair B
 			 *   - Fail B
 			 *)
-				FAIL (?nr) where (0 < nr) and (nr <= total) and not(never_fail);
+				FAIL (?nr) where (0 < nr) and (nr <= total); (* and not(never_fail); *)
 				if ((nr == nr_failed) and not(never_fail)) then
 					nr_failed:=nr_failed+1
 				else
